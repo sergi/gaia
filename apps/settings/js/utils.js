@@ -190,7 +190,7 @@ var getMobileConnection = function() {
   // this is used to keep all tests passing while introducing multi-sim APIs
   var mobileConnection = navigator.mozMobileConnection ||
     navigator.mozMobileConnections &&
-      navigator.mozMobileConnections[0];
+    navigator.mozMobileConnections[0];
 
   if (mobileConnection && mobileConnection.data)
     return mobileConnection;
@@ -214,14 +214,14 @@ var getNfc = function() {
  */
 function getSupportedNetworkInfo(mobileConneciton, callback) {
   var types = [
-    'wcdma/gsm',
-    'gsm',
-    'wcdma',
-    'wcdma/gsm-auto',
-    'cdma/evdo',
-    'cdma',
-    'evdo',
-    'wcdma/gsm/cdma/evdo'
+      'wcdma/gsm',
+      'gsm',
+      'wcdma',
+      'wcdma/gsm-auto',
+      'cdma/evdo',
+      'cdma',
+      'evdo',
+      'wcdma/gsm/cdma/evdo'
   ];
   if (!mobileConneciton)
     return;
@@ -324,7 +324,7 @@ function getTruncated(oldName, options) {
 
     oldHeight = node.clientHeight;
     node.textContent = nameBeforeEllipsisString +
-        ellipsisCharacter + nameAfterEllipsis;
+      ellipsisCharacter + nameAfterEllipsis;
     newHeight = node.clientHeight;
 
     /*
@@ -411,4 +411,26 @@ function getTruncated(oldName, options) {
   }
 
   return newName;
+}
+
+/**
+ * Retrieve current ICC by a given index.
+ *
+ * @param index {Number} index of the mobile connection to get the ICC from
+ * @returns {object}
+ */
+function getIccByIndex(index) {
+  if (!index && index !== 0) {
+    index = DsdsSettings.getIccCardIndexForCallSettings();
+  }
+  var iccObj;
+
+  if (navigator.mozMobileConnections[index]) {
+    var iccId = navigator.mozMobileConnections[index].iccId;
+    if (iccId) {
+      iccObj = navigator.mozIccManager.getIccById(iccId);
+    }
+  }
+
+  return iccObj;
 }
