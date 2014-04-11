@@ -1,0 +1,69 @@
+body[data-transitioning] #paginationBar, body.ad #paginationBar {
+  z-index: 11001;
+}
+
+.apps {
+  z-index: inherit;
+}
+
+.apps > div.ad-page { /* Might just want to put !important on height instead */
+  height: 100%;
+  background-size: cover;
+  z-index: 11000;
+  display: block; /* Dont lazy load */
+  transform: translateX(-1000px); /* Put off screen as start, will move into screen via grid.js */
+}
+
+#cardsContainer {
+  height: 100%;
+  overflow-y: auto;
+  width: 100%;
+}
+
+[data-card-id="operatorCard"] {
+  background-color: #00a6d6 !important;
+  height: 45%;
+}
+
+#cardsContainer>.card {
+  padding: 20px;
+}
+
+#cardsContainer>.ad {
+  height: 144px;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#cardsContainer>.ad {
+  background-color: #fff;
+}
+
+#cardsContainer>.ad p {
+  font-size: 15px;
+  margin: 0 10px;
+}
+
+#cardsContainer>.ad:nth-of-type(odd) .summaryImage {
+  float: right;
+  width: 100px;
+}
+
+#cardsContainer>.ad:nth-of-type(odd) .summaryContent {
+  float: right;
+  width: 160px;
+}
+
+#cardsContainer>.ad:nth-of-type(even) .summaryImage {
+  float: left;
+  width: 100px;
+}
+
+#cardsContainer>.ad:nth-of-type(even) .summaryContent {
+  float: left;
+  width: 160px;
+}
+
