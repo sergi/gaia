@@ -4,8 +4,10 @@
     var self = this;
 
     this.cardsList = {};
-    this.domElement = document.createElement('div');
-    this.domElement.id = 'cardsContainer';
+    this.summaryContainer = document.createElement('div');
+    this.summaryContainer.id = 'summaryContainer';
+    this.detailsContainer = document.createElement('div');
+    this.detailsContainer.id = 'detailsContainer';
 
     this.activeCard = null;
     this.dataStore = null;
@@ -23,21 +25,12 @@
       var el = gridManager.container.firstChild;
       el.classList.add('ad-page');
 
-      var operatorCard = new OperatorCard();
-      this.domElement.appendChild(operatorCard.domElement);
-      this.cardsList[operatorCard.cardId] = operatorCard;
-
-      for (var i = 1; i < 11; i++) {
-        var ad = new Ad(i);
-        this.domElement.appendChild(ad.domElement);
-        this.cardsList[ad.cardId] = ad;
-      }
-
       var startEvent, currentX, currentY, startX, startY, dx, dy,
-          detecting = scrolling = false;
+          detecting = swiping = scrolling = details = false;
 
       el.addEventListener('gridpageshowend', function(e) {
-        self.domElement.style.overflowY = "auto";
+      });
+      el.addEventListener('gridpagehideend', function(e) {
       });
 
       el.addEventListener('touchstart', function(e) {
@@ -57,7 +50,7 @@
           dy = currentY - startY;
           if (dx < -25 && (dy > -15 || dy < 15)) {
             detecting = scrolling = false;
-            self.domElement.style.overflow = "hidden";
+            swiping = true;
           } else if (dx > -25 && (dy < -15 || dy > 15)) {
             detecting = false;
             scrolling = true;
@@ -65,32 +58,64 @@
         }
       });
       el.addEventListener('touchend', function(e) {
+        if (swiping === false && scrolling === false) {
+          if (details === false) {
+            var card = self.cardsList[e.target.dataset.cardId];
+            if (card) {
+              console.log(card);
+              self.showCardDetails(card);
+              details = true;
+            }
+          } else {
+            self.detailsContainer.classList.remove("active");
+            details = false;
+          }
+        }
         detecting = scrolling = false;
       });
 
-      el.appendChild(this.domElement);
+      this.createCards();
+
+      el.appendChild(this.summaryContainer);
+      el.appendChild(this.detailsContainer);
+
       return el;
     };
   };
 
-  function Card(cardId) {
+  AdManager.prototype.createCards = function() {
+      var operatorCard = new OperatorCard();
+      this.summaryContainer.appendChild(operatorCard.domElement);
+
+      for (var i = 1; i < 11; i++) {
+        var ad = new Ad(i);
+        this.summaryContainer.appendChild(ad.domElement);
+        this.cardsList[ad.cardId] = ad;
+      }
+  }
+
+  AdManager.prototype.showCardDetails = function (card) {
+    this.detailsContainer.classList.add("active");
+  }
+
+  function Card() {
     this.domElement = document.createElement('div');
     this.domElement.classList.add('card');
-
-    this.domElement.dataset.cardId = cardId;
-    this.cardId = cardId;
   }
 
   function OperatorCard() {
-    Card.call(this, "operatorCard");
+    Card.call(this);
+    this.domElement.classList.add('introCard');
   }
 
   OperatorCard.prototype = Card.prototype;
   OperatorCard.prototype.constructor = OperatorCard;
 
   function Ad(adId) {
-    Card.call(this, adId);
+    Card.call(this);
     this.domElement.classList.add('ad');
+    this.domElement.dataset.cardId = adId;
+    this.cardId = adId;
 
     this.summaryImage = document.createElement('img');
     this.summaryImage.classList.add('summaryImage');
@@ -102,20 +127,10 @@
 
     this.domElement.appendChild(this.summaryImage);
     this.domElement.appendChild(this.summaryContent);
-
   }
 
   Ad.prototype = Card.prototype;
   Ad.prototype.constructor = Ad;
-
-  Ad.prototype.initialize = function() {
-  }
-
-  Ad.prototype.makeActive = function(e) {
-  }
-
-  Ad.prototype.makeInactive = function() {
-  }
 
   document.addEventListener('homescreen-ready', function(e) {
     var adManager = new AdManager(window.GridManager);
