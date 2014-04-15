@@ -26,7 +26,7 @@
       el.classList.add('ad-page');
 
       var startEvent, currentX, currentY, startX, startY, dx, dy,
-          detecting = swiping = scrolling = details = false;
+          detecting = false, swiping = false, scrolling = false, details = false;
 
       el.addEventListener('gridpageshowend', function(e) {
       });
@@ -35,6 +35,7 @@
 
       el.addEventListener('touchstart', function(e) {
         startEvent = e;
+        swiping = false;
         detecting = true;
         startX = startEvent.touches[0].pageX;
         startY = startEvent.touches[0].pageY;
