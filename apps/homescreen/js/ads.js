@@ -88,12 +88,17 @@
       var operatorCard = new OperatorCard();
       this.summaryContainer.appendChild(operatorCard.domElement);
 
-      for (var i = 1; i < 11; i++) {
+      for (var i = 1; i <= 10; i++) {
         var ad = new Ad(i);
         this.summaryContainer.appendChild(ad.domElement);
         this.cardsList[ad.cardId] = ad;
       }
 
+      for (var i = 1; i <= 5; i++) {
+        var detailedAd = new DetailedAd();
+        this.detailsContainer.appendChild(detailedAd.domElement);
+      }
+      this.cardsList[3].domElement.classList.remove("ad");
       this.cardsList[3].domElement.classList.add("offer");
   }
 
@@ -107,12 +112,9 @@
   }
 
   function OperatorCard() {
-    Card.call(this);
-    this.domElement.classList.add('introCard');
+    this.domElement = document.createElement('div');
+    this.domElement.classList.add('intro');
   }
-
-  OperatorCard.prototype = Card.prototype;
-  OperatorCard.prototype.constructor = OperatorCard;
 
   function Ad(adId) {
     Card.call(this);
@@ -134,6 +136,25 @@
 
   Ad.prototype = Card.prototype;
   Ad.prototype.constructor = Ad;
+
+  function DetailedAd() {
+    Card.call(this);
+    this.domElement.classList.add('ad');
+
+    this.summaryImage = document.createElement('img');
+    this.summaryImage.classList.add('summaryImage');
+    this.summaryContent = document.createElement('p');
+    this.summaryContent.classList.add('summaryContent');
+
+    this.summaryImage.src = "placeholder-100x144.jpg";
+    this.summaryContent.textContent = "Lorem ipsum dolor sit amet, consectetur adipisicing elit"
+
+    this.domElement.appendChild(this.summaryImage);
+    this.domElement.appendChild(this.summaryContent);
+  }
+
+  DetailedAd.prototype = Card.prototype;
+  DetailedAd.prototype.constructor = DetailedAd;
 
   document.addEventListener('homescreen-ready', function(e) {
     var adManager = new AdManager(window.GridManager);

@@ -21,13 +21,71 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   width: 100%;
 }
 
-#summaryContainer > .introCard {
+#summaryContainer > .intro {
   background-color: #00a6d6 !important;
   height: 45%;
 }
 
+#summaryContainer > .card {
+  height: 105px;
+  margin: 20px 10px;
+  padding: 9px 10px 11px;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#summaryContainer > .card p {
+  font-size: 15px;
+  margin: 0 10px;
+}
+
+#summaryContainer > .ad {
+  background-color: #f6f6f6;
+}
+
+#summaryContainer > .offer {
+  background-color: #e5f4f9;
+}
+
+#summaryContainer > .offer .summaryImage {
+  border-color: #0493c8;
+}
+
+#summaryContainer .summaryImage {
+  border: 2px solid #fff;
+  height: 104px;
+  width: 125px;
+}
+
+#summaryContainer .summaryContent {
+  width: 130px;
+}
+
+#summaryContainer > .card:nth-of-type(odd) .summaryImage {
+  float: right;
+}
+
+#summaryContainer > .card:nth-of-type(odd) .summaryContent {
+  float: right;
+}
+
+#summaryContainer > .card:nth-of-type(even) .summaryImage {
+  float: left;
+}
+
+#summaryContainer > .card:nth-of-type(even) .summaryContent {
+  float: left;
+}
+
+#summaryContainer > .card * {
+  pointer-events: none;
+}
+
 #detailsContainer {
-  background-color: #f00;
+  background-color: #bbb;
   height: 100%;
   position: absolute;
   top: 0px;
@@ -46,61 +104,10 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   transform: translateY(0);
 }
 
-#summaryContainer > .ad {
-  height: 105px;
-  padding: 9px 10px 11px;
-
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-#summaryContainer > .ad {
-  background-color: #f6f6f6;
-  margin: 20px 10px;
-}
-
-#summaryContainer > .ad.offer {
-  background-color: #e5f4f9;
-}
-
-#summaryContainer > .ad p {
-  font-size: 15px;
-  margin: 0 10px;
-}
-
-#summaryContainer > .ad.offer .summaryImage {
-  border-color: #0493c8;
-}
-
-#summaryContainer .summaryImage {
+#detailsContainer > .card {
+  background-color: #fff;
   border: 2px solid #fff;
-  height: 104px;
-  width: 125px;
-}
-
-#summaryContainer .summaryContent {
-  width: 130px;
-}
-
-#summaryContainer > .ad:nth-of-type(odd) .summaryImage {
-  float: right;
-}
-
-#summaryContainer > .ad:nth-of-type(odd) .summaryContent {
-  float: right;
-}
-
-#summaryContainer > .ad:nth-of-type(even) .summaryImage {
-  float: left;
-}
-
-#summaryContainer > .ad:nth-of-type(even) .summaryContent {
-  float: left;
-}
-
-#summaryContainer > .ad * {
-  pointer-events: none;
+  height: 371px;
+  margin: 20px 10px;
 }
 
