@@ -93,6 +93,8 @@
         this.summaryContainer.appendChild(ad.domElement);
         this.cardsList[ad.cardId] = ad;
       }
+
+      this.cardsList[3].domElement.classList.add("offer");
   }
 
   AdManager.prototype.showCardDetails = function (card) {
@@ -124,7 +126,7 @@
     this.summaryContent.classList.add('summaryContent');
 
     this.summaryImage.src = "placeholder-100x144.jpg";
-    this.summaryContent.textContent = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    this.summaryContent.textContent = "Lorem ipsum dolor sit amet, consectetur adipisicing elit"
 
     this.domElement.appendChild(this.summaryImage);
     this.domElement.appendChild(this.summaryContent);

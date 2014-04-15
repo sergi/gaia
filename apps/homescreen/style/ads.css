@@ -15,6 +15,7 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
 }
 
 #summaryContainer {
+  background-color: #fff;
   height: 100%;
   overflow-y: auto;
   width: 100%;
@@ -45,12 +46,9 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   transform: translateY(0);
 }
 
-#summaryContainer > .card {
-  padding: 20px;
-}
-
 #summaryContainer > .ad {
-  height: 144px;
+  height: 105px;
+  padding: 9px 10px 11px;
 
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -59,7 +57,12 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
 }
 
 #summaryContainer > .ad {
-  background-color: #fff;
+  background-color: #f6f6f6;
+  margin: 20px 10px;
+}
+
+#summaryContainer > .ad.offer {
+  background-color: #e5f4f9;
 }
 
 #summaryContainer > .ad p {
@@ -67,24 +70,34 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   margin: 0 10px;
 }
 
+#summaryContainer > .ad.offer .summaryImage {
+  border-color: #0493c8;
+}
+
+#summaryContainer .summaryImage {
+  border: 2px solid #fff;
+  height: 104px;
+  width: 125px;
+}
+
+#summaryContainer .summaryContent {
+  width: 130px;
+}
+
 #summaryContainer > .ad:nth-of-type(odd) .summaryImage {
   float: right;
-  width: 100px;
 }
 
 #summaryContainer > .ad:nth-of-type(odd) .summaryContent {
   float: right;
-  width: 160px;
 }
 
 #summaryContainer > .ad:nth-of-type(even) .summaryImage {
   float: left;
-  width: 100px;
 }
 
 #summaryContainer > .ad:nth-of-type(even) .summaryContent {
   float: left;
-  width: 160px;
 }
 
 #summaryContainer > .ad * {
