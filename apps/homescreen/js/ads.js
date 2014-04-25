@@ -30,7 +30,13 @@
     FORWARD: 1
   };
 
-  var AdManager = exports.AdManager =  function(gridManager) {
+  var AdManager = exports.AdManager = function(adView) {
+    var self = this;
+
+    this.view = adView;
+  };
+
+  var AdView = exports.AdView =  function(gridManager) {
     var self = this;
 
     this.cardsList = {};
@@ -131,7 +137,7 @@
     };
   };
 
-  AdManager.prototype.createCards = function() {
+  AdView.prototype.createCards = function() {
       var operatorCard = new OperatorCard();
       this.summaryContainer.appendChild(operatorCard.domElement);
 
@@ -150,13 +156,13 @@
       }
   };
 
-  AdManager.prototype.showCardDetails = function (card) {
+  AdView.prototype.showCardDetails = function (card) {
     this.currentCard = card-0;
     var translateOffset = card === '0' ? 0 : (card * -395) + 20;
     this.detailsWrapper.style.transform = 'translateY(' + translateOffset + 'px)';
   };
 
-  AdManager.prototype.openDetails = function (card) {
+  AdView.prototype.openDetails = function (card) {
     this.showCardDetails(card);
     this.detailsContainer.classList.add('active');
     setTimeout(function() {
@@ -164,7 +170,7 @@
     }, 450);
   }
 
-  AdManager.prototype.closeDetails = function () {
+  AdView.prototype.closeDetails = function () {
     this.detailsContainer.classList.remove('active');
     this.detailsWrapper.classList.remove('active');
   }
@@ -239,13 +245,14 @@
   };
 
   document.addEventListener('homescreen-ready', function(e) {
-    var adManager = new AdManager(window.GridManager);
-    adManager.createAdPage();
+    var adView = new AdView(window.GridManager);
+    adView.createAdPage();
+    var adManager = new AdManager(AdView);
 
     GridManager.goToLandingPage = function() {
       document.body.dataset.transitioning = 'true';
       // if we have ads the home button should go to page 1, not 0
-      GridManager.goToPage(adManager ? 1 : 0);
+      GridManager.goToPage(AdView ? 1 : 0);
     };
   }, false);
 
