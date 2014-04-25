@@ -50,7 +50,7 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   background-color: #e5f4f9;
 }
 
-#summaryContainer > .offer .summaryImage {
+#summaryContainer > .telenor .summaryImage {
   border-color: #0493c8;
 }
 
@@ -86,7 +86,9 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
 
 #detailsContainer {
   background-color: #bbb;
+  background-image: url('images/20140411_firefox_assets_001_bgPattern.png');
   height: 100%;
+  overflow: hidden;
   position: absolute;
   top: 0px;
   transform: translateY(100%);
@@ -104,10 +106,45 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   transform: translateY(0);
 }
 
-#detailsContainer > .card {
+#detailsWrapper.active {
+  -moz-transition: 0.25s;
+  -ms-transition: 0.25s;
+  -o-transition: 0.25s;
+  -webkit-transition: 0.25s;
+  transition: 0.25s;
+}
+
+#detailsContainer .card {
   background-color: #fff;
   border: 2px solid #fff;
   height: 371px;
-  margin: 20px 10px;
+  margin: 20px 8px;
+  position: relative;
+}
+
+#detailsContainer .card .activationButton {
+  align-items: center;
+  background-color: #0493c8;
+  bottom: 0;
+  display: flex;
+  height: 40px;
+  justify-content: center;
+  margin: 8px;
+  position: absolute;
+  width: 284px;
+}
+
+#detailsContainer .card .activationButton .activationText {
+  color: #fff;
+  font-size: 20px;
+}
+
+#detailsContainer .telenor {
+  border-color: #0493c8;
+}
+
+#detailsWrapper {
+  pointer-events: none;
+  will-change: transform;
 }
 
