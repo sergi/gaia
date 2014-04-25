@@ -5,6 +5,11 @@ module.exports = {
   zoom: {
     disabled: false
   },
+  caf: {
+    // Set this property to true if you want to disable continuous auto focus
+    // even on hardware that supports it.
+    disabled: false
+  },
   viewfinder: {
     scaleType: 'fill'
   },
@@ -16,6 +21,9 @@ module.exports = {
       shutdown: 5,
       healthy: 100
     }
+  },
+  geolocation: {
+    promptDelay: 2000
   },
   mode: {
     options: [
@@ -232,24 +240,24 @@ module.exports = {
 
   settingsMenu: {
     items: [
-       {
-         key: 'hdr'
-       },
       // {
       //   key: 'scene'
       // },
       {
-        key: 'grid'
+        key: 'hdr'
       },
       {
         key: 'timer'
-      }//,
+      },
       // {
       //   key: 'pictureSizes'
       // },
       // {
       //   key: 'recorderProfiles'
-      // }
+      // },
+      {
+        key: 'grid'
+      }
     ]
   }
 };

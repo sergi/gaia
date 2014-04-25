@@ -10,6 +10,7 @@ var bindAll = require('lib/bind-all');
 var PreviewGalleryView = require('views/preview-gallery');
 var createThumbnailImage = require('lib/create-thumbnail-image');
 var preparePreview = require('lib/prepare-preview-blob');
+var CustomDialog = require('CustomDialog');
 
 /**
  * The size of the thumbnail images we generate.
@@ -24,9 +25,7 @@ var THUMBNAIL_HEIGHT = 54 * window.devicePixelRatio;
  * Exports
  */
 
-exports = module.exports = function(app) {
-  return new PreviewGalleryController(app);
-};
+module.exports = function(app) { return new PreviewGalleryController(app); };
 module.exports.PreviewGalleryController = PreviewGalleryController;
 
 function PreviewGalleryController(app) {
@@ -40,12 +39,10 @@ function PreviewGalleryController(app) {
 }
 
 PreviewGalleryController.prototype.bindEvents = function() {
+  this.storage.on('itemdeleted', this.onItemDeleted);
   this.app.on('preview', this.openPreview);
   this.app.on('newmedia', this.onNewMedia);
   this.app.on('blur', this.onBlur);
-
-  this.storage.on('itemdeleted', this.onItemDeleted);
-
   debug('events bound');
 };
 
@@ -70,13 +67,15 @@ PreviewGalleryController.prototype.openPreview = function() {
   this.view.on('click:share', this.shareCurrentItem);
   this.view.on('click:delete', this.deleteCurrentItem);
   this.view.on('click:back', this.closePreview);
-  this.view.on('itemChange', this.handleItemChange);
+  this.view.on('swipe', this.handleSwipe);
+  this.view.on('click:options', this.onOptionsClick);
 
   // If lockscreen is locked, hide all control buttons
   var secureMode = this.app.inSecureMode;
   this.view.set('secure-mode', secureMode);
   this.view.open();
 
+  this.app.set('previewGalleryOpen', true);
   this.previewItem();
 };
 
@@ -94,6 +93,8 @@ PreviewGalleryController.prototype.closePreview = function() {
     this.view.destroy();
     this.view = null;
   }
+
+  this.app.set('previewGalleryOpen', false);
   this.app.emit('previewgallery:closed');
 };
 
@@ -107,8 +108,10 @@ PreviewGalleryController.prototype.onGalleryButtonClick = function() {
   // Can't launch the gallery if the lockscreen is locked.
   // The button shouldn't even be visible in this case, but
   // let's be really sure here.
-  if (this.app.inSecureMode) { return; }
-  
+  if (this.app.inSecureMode) {
+    return;
+  }
+
   var MozActivity = window.MozActivity;
 
   // Launch the gallery with an activity
@@ -118,8 +121,19 @@ PreviewGalleryController.prototype.onGalleryButtonClick = function() {
   });
 };
 
+PreviewGalleryController.prototype.onOptionsClick = function() {
+  if (this.app.inSecureMode) {
+    return;
+  }
+
+  this.view.showOptionsMenu();
+};
+
+
 PreviewGalleryController.prototype.shareCurrentItem = function() {
-  if (this.app.inSecureMode) { return; }
+  if (this.app.inSecureMode) {
+    return;
+  }
 
   var index = this.currentItemIndex;
   var item = this.items[index];
@@ -142,7 +156,7 @@ PreviewGalleryController.prototype.shareCurrentItem = function() {
 };
 
 /**
- * Delete the current item 
+ * Delete the current item
  * when the delete button is pressed.
  * @private
  */
@@ -155,6 +169,7 @@ PreviewGalleryController.prototype.deleteCurrentItem = function() {
   var item = this.items[index];
   var filepath = item.filepath;
   var msg;
+  var self = this;
 
   if (item.isVideo) {
     msg = navigator.mozL10n.get('delete-video?');
@@ -163,14 +178,28 @@ PreviewGalleryController.prototype.deleteCurrentItem = function() {
     msg = navigator.mozL10n.get('delete-photo?');
   }
 
-  if (window.confirm(msg)) {
-    this.updatePreviewGallery(index);
+  CustomDialog.show('',
+                    msg,
+                    { title: navigator.mozL10n.get('cancel'),
+                      callback: closeDialog },
+                    { title: navigator.mozL10n.get('delete'),
+                      callback: deleteItem,
+                      recommend: false });
+
+  function closeDialog() {
+    CustomDialog.hide();
+  }
+
+  function deleteItem() {
+    CustomDialog.hide();
+
+    self.updatePreviewGallery(index);
 
     // Actually delete the file
     if (item.isVideo) {
-      this.storage.deleteVideo(filepath);
+      self.storage.deleteVideo(filepath);
     } else {
-      this.storage.deleteImage(filepath);
+      self.storage.deleteImage(filepath);
     }
   }
 };
@@ -204,15 +233,12 @@ PreviewGalleryController.prototype.updatePreviewGallery = function(index) {
 /**
  * To Do: Image Swipe Transition
  */
-PreviewGalleryController.prototype.handleItemChange = function(e) {
-  var direction = e.detail.direction;
-  switch (direction) {
-  case 'left': // go to next image
+PreviewGalleryController.prototype.handleSwipe = function(direction) {
+  if (direction === 'left') {
     this.next();
-    break;
-  case 'right': // go to previous
+  }
+  else if (direction === 'right') {
     this.previous();
-    break;
   }
 };
 

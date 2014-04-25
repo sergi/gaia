@@ -233,8 +233,7 @@
       // but this.app.resized may be cleared.
       if (this.app.resized &&
           !LayoutManager.match(this.app.width,
-            this.app.height - this.app.calibratedHeight(),
-            this.app.isFullScreen())) {
+            this.app.height - this.app.calibratedHeight())) {
         this.app.resize();
       }
       this.app.waitForNextPaint(function() {
@@ -287,7 +286,7 @@
       var classes = ['enlarge', 'reduce', 'to-cardview', 'from-cardview',
         'invoking', 'invoked', 'zoom-in', 'zoom-out', 'fade-in', 'fade-out',
         'transition-opening', 'transition-closing', 'immediate',
-        'slideup', 'slidedown'];
+        'slideup', 'slidedown', 'in-from-left', 'out-to-right'];
 
       classes.forEach(function iterator(cls) {
         this.app.element.classList.remove(cls);

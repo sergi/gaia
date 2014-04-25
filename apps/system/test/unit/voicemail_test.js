@@ -6,6 +6,7 @@ requireApp('system/js/mock_simslot_manager.js');
 requireApp('system/test/unit/mock_l10n.js');
 requireApp('system/test/unit/mock_navigator_moz_voicemail.js');
 requireApp('system/shared/test/unit/mocks/mock_navigator_moz_settings.js');
+requireApp('system/shared/test/unit/mocks/mock_navigator_moz_telephony.js');
 requireApp('system/shared/test/unit/mocks/mock_settings_helper.js');
 
 mocha.setup({
@@ -18,6 +19,9 @@ suite('voicemail notification', function() {
   var realSIMSlotManager;
   var realL10n;
   var realSettingsHelper;
+  var realMozTelephony;
+
+  var notificationSpy;
 
   suiteSetup(function() {
     realMozVoicemail = navigator.mozVoicemail;
@@ -39,7 +43,7 @@ suite('voicemail notification', function() {
   setup(function() {
     Voicemail.init();
     this.notificationListenerSpy = sinon.spy('');
-    this.sinon.stub(window, 'Notification').returns({
+    notificationSpy = this.sinon.stub(window, 'Notification').returns({
       addEventListener: this.notificationListenerSpy,
       close: function() {}
     });
@@ -58,6 +62,7 @@ suite('voicemail notification', function() {
     MockSIMSlotManager.mTeardown();
     MockNavigatorMozVoicemail.mTeardown();
     window.Notification.restore();
+    notificationSpy = null;
   });
 
   test('no voicemail status change, no notification', function(done) {
@@ -152,6 +157,29 @@ suite('voicemail notification', function() {
                 Voicemail.showNotification.restore();
               });
 
+              test('should/should not display SIM indicator', function() {
+                var baseTitle = 'aaaa';
+                var multiSimTitle =
+                  '(' + MockL10n.get('sim-picker-button', { n: 2 }) + ') ' +
+                  baseTitle;
+
+                Voicemail.showNotification(
+                  baseTitle, 'bbbb', '1111', serviceId);
+
+                sinon.assert.calledWithNew(notificationSpy);
+                sinon.assert.calledOnce(notificationSpy);
+                assert.equal(notificationSpy.firstCall.args[1].body, 'bbbb');
+                assert.equal(notificationSpy.firstCall.args[1].tag,
+                             'voicemailNotification:' + serviceId);
+
+                if (this.isMultiSIM) {
+                  assert.equal(
+                    notificationSpy.firstCall.args[0], multiSimTitle);
+                } else {
+                  assert.equal(notificationSpy.firstCall.args[0], baseTitle);
+                }
+              });
+
               test('with returnMessage, with voicemail number', function(done) {
                 MockNavigatorMozVoicemail.mTriggerEvent('statuschanged');
                 setTimeout((function() {
@@ -161,14 +189,9 @@ suite('voicemail notification', function() {
                   var expectedText = 'dialNumber{"number":"' +
                     this.voiceNumbers[serviceId] + '"}';
 
-                  // Add SIM number indicator in the multi sim case
-                  if (this.isMultiSIM) {
-                    expectedTitle =
-                      'SIM ' + (serviceId + 1) + ' - ' + expectedTitle;
-                  }
-
-                  sinon.assert.calledWith(Voicemail.showNotification,
-                    expectedTitle, expectedText, this.voiceNumbers[serviceId]);
+                  sinon.assert.calledWithExactly(Voicemail.showNotification,
+                    expectedTitle, expectedText,
+                    this.voiceNumbers[serviceId], serviceId);
 
                   done();
                 }).bind(this));
@@ -187,15 +210,9 @@ suite('voicemail notification', function() {
                     var expectedText = 'dialNumber{"number":"' +
                       MockNavigatorMozVoicemail.mNumbers[serviceId] + '"}';
 
-                    // Add SIM number indicator in the multi sim case
-                    if (this.isMultiSIM) {
-                      expectedTitle =
-                        'SIM ' + (serviceId + 1) + ' - ' + expectedTitle;
-                    }
-
-                    sinon.assert.calledWith(Voicemail.showNotification,
+                    sinon.assert.calledWithExactly(Voicemail.showNotification,
                       expectedTitle, expectedText,
-                      this.voiceNumbers[serviceId]);
+                      this.voiceNumbers[serviceId], serviceId);
 
                     done();
                   }).bind(this));
@@ -214,15 +231,9 @@ suite('voicemail notification', function() {
                     var expectedText = 'dialNumber{"number":"' +
                       MockNavigatorMozVoicemail.mNumbers[serviceId] + '"}';
 
-                    // Add SIM number indicator in the multi sim case
-                    if (this.isMultiSIM) {
-                      expectedTitle =
-                        'SIM ' + (serviceId + 1) + ' - ' + expectedTitle;
-                    }
-
-                    sinon.assert.calledWith(Voicemail.showNotification,
+                    sinon.assert.calledWithExactly(Voicemail.showNotification,
                       expectedTitle, expectedText,
-                      this.voiceNumbers[serviceId]);
+                      this.voiceNumbers[serviceId], serviceId);
 
                     done();
                   }).bind(this));
@@ -238,14 +249,8 @@ suite('voicemail notification', function() {
                   // display the message as body
                   var expectedText = MockNavigatorMozVoicemail.mMessage;
 
-                  // Add SIM number indicator in the multi sim case
-                  if (this.isMultiSIM) {
-                    expectedTitle =
-                      'SIM ' + (serviceId + 1) + ' - ' + expectedTitle;
-                  }
-
-                  sinon.assert.calledWith(Voicemail.showNotification,
-                    expectedTitle, expectedText, undefined);
+                  sinon.assert.calledWithExactly(Voicemail.showNotification,
+                    expectedTitle, expectedText, undefined, serviceId);
 
                   done();
                 }).bind(this));
@@ -274,15 +279,9 @@ suite('voicemail notification', function() {
                       var expectedText = 'dialNumber{"number":"' +
                         this.voiceNumbers[serviceId] + '"}';
 
-                      // Add SIM number indicator in the multi sim case
-                      if (this.isMultiSIM) {
-                        expectedTitle =
-                          'SIM ' + (serviceId + 1) + ' - ' + expectedTitle;
-                      }
-
-                      sinon.assert.calledWith(Voicemail.showNotification,
+                      sinon.assert.calledWithExactly(Voicemail.showNotification,
                         expectedTitle, expectedText,
-                        this.voiceNumbers[serviceId]);
+                        this.voiceNumbers[serviceId], serviceId);
 
                       done();
                     }).bind(this));
@@ -292,5 +291,74 @@ suite('voicemail notification', function() {
         });
       })(i);
     }
+  });
+
+  suite('placing voicemail calls', function() {
+    var telephonyDialSpy;
+    var notificationTitle = 'Title';
+    var notificationText = 'Text';
+    var voicemailNumber = '111';
+
+    suiteSetup(function() {
+      realMozTelephony = navigator.mozTelephony;
+      navigator.mozTelephony = MockNavigatorMozTelephony;
+    });
+
+    setup(function() {
+      telephonyDialSpy = this.sinon.spy(MockNavigatorMozTelephony, 'dial');
+    });
+
+    suiteTeardown(function() {
+      MockNavigatorMozTelephony.mSuiteTeardown();
+      navigator.mozTelephony = realMozTelephony;
+    });
+
+    teardown(function() {
+      MockNavigatorMozTelephony.calls = [];
+      MockNavigatorMozTelephony.mTeardown();
+    });
+
+    test('place a call if there is none pending', function() {
+      MockNavigatorMozTelephony.calls = [];
+      Voicemail.showNotification(
+        notificationTitle, notificationText, voicemailNumber);
+      this.notificationListenerSpy.yield();
+      sinon.assert.calledWith(telephonyDialSpy, voicemailNumber, 0);
+    });
+
+    test('place a call if there is less than two pending', function() {
+      MockNavigatorMozTelephony.calls = [{}];
+      Voicemail.showNotification(
+        notificationTitle, notificationText, voicemailNumber);
+      this.notificationListenerSpy.yield();
+      sinon.assert.calledWith(telephonyDialSpy, voicemailNumber, 0);
+    });
+
+    test('do not place a call if there is already two pending', function() {
+      MockNavigatorMozTelephony.calls = [{}, {}];
+      Voicemail.showNotification(
+        notificationTitle, notificationText, voicemailNumber);
+      this.notificationListenerSpy.yield();
+      sinon.assert.notCalled(telephonyDialSpy);
+    });
+
+    test('place a voicemail call to SIM 1', function() {
+      var serviceId = 0;
+      Voicemail.showNotification(
+        notificationTitle, notificationText, voicemailNumber, serviceId);
+      this.notificationListenerSpy.yield();
+      sinon.assert.calledWithExactly(
+        telephonyDialSpy, voicemailNumber, serviceId);
+    });
+
+    test('place a voicemail call to SIM 2', function() {
+      var serviceId = 1;
+      voicemailNumber = '222';
+      Voicemail.showNotification(
+        notificationTitle, notificationText, voicemailNumber, serviceId);
+      this.notificationListenerSpy.yield();
+      sinon.assert.calledWithExactly(
+        telephonyDialSpy, voicemailNumber, serviceId);
+    });
   });
 });
