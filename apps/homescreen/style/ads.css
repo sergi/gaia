@@ -3,7 +3,6 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
 }
 
 .apps {
-  z-index: inherit;
 }
 
 .apps > div.ad-page { /* Might just want to put !important on height instead */
@@ -22,8 +21,15 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
 }
 
 #summaryContainer > .intro {
+  align-items: center;
   background-color: #00a6d6 !important;
+  display: flex;
   height: 45%;
+  justify-content: center;
+}
+
+#summaryContainer > .intro p {
+  font-size: 24px;
 }
 
 #summaryContainer > .card {
@@ -130,6 +136,7 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   height: 40px;
   justify-content: center;
   margin: 8px;
+  pointer-events: all;
   position: absolute;
   width: 284px;
 }
@@ -137,6 +144,10 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
 #detailsContainer .card .activationButton .activationText {
   color: #fff;
   font-size: 20px;
+}
+
+#detailsContainer .card .content {
+  font-size: 18px;
 }
 
 #detailsContainer .telenor {

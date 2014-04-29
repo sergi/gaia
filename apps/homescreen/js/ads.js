@@ -3,16 +3,77 @@
 /*global GridManager MozActivity dump */
 (function(exports) {
 
-  var AdData = {
+  var AdData = [{
     activationText: 'এই একটি বিজ্ঞাপন হয়',
-    id: 'Ad',
+    id: 'Ad-1',
     images: {
       summary: 'style/images/20140411_firefox_assets_010_promo-card-image_SCALED-DOWN.png',
       details: 'style/images/20140411_firefox_assets_002_promo-card-image.png'
     },
-    text: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit',
-    type: 'ad'
-  };
+    text: 'আমরা শীঘ্রই আপনাকে দেখতে আশা করি!',
+    type: 'ad',
+    url: 'http://www.google.com/search?q=test'
+  },{
+    activationText: 'এই একটি বিজ্ঞাপন হয়',
+    id: 'Ad-2',
+    images: {
+      summary: 'style/images/banner-publish-125x104.jpg',
+      details: 'style/images/banner-publish-300x250.jpg'
+    },
+    text: 'আমরা শীঘ্রই আপনাকে দেখতে আশা করি!',
+    type: 'ad',
+    url: 'http://www.google.com/search?q=publish'
+  },{
+    activationText: 'এই একটি বিজ্ঞাপন হয়',
+    id: 'Ad-3',
+    images: {
+      summary: 'style/images/Coffeys-Coffee-125x104.jpg',
+      details: 'style/images/Coffeys-Coffee-300x250.jpg'
+    },
+    text: 'এখন আমাদের দেখার জন্য দয়া করে!',
+    type: 'ad',
+    url: 'http://www.google.com/search?q=coffee'
+  },{
+    activationText: 'এই একটি বিজ্ঞাপন হয়',
+    id: 'Ad-4',
+    images: {
+      summary: 'style/images/kfc-125x104.jpg',
+      details: 'style/images/kfc-300x250.jpg'
+    },
+    text: 'আমরা শীঘ্রই আপনাকে দেখতে আশা করি!',
+    type: 'ad',
+    url: 'http://www.kfc.com'
+  },{
+    activationText: 'এই একটি বিজ্ঞাপন হয়',
+    id: 'Ad-5',
+    images: {
+      summary: 'style/images/landflip_125x104.png',
+      details: 'style/images/landflip_300x250.png'
+    },
+    text: 'এটি একটি সীমিত সময়ের অফার হয়',
+    type: 'ad',
+    url: 'http://www.google.com/search?q=landflip'
+  },{
+    activationText: 'এই একটি বিজ্ঞাপন হয়',
+    id: 'Ad-6',
+    images: {
+      summary: 'style/images/VW_TouaregBoeing_125x104.jpg',
+      details: 'style/images/VW_TouaregBoeing_300x250.jpg'
+    },
+    text: 'এখন আমাদের দেখার জন্য দয়া করে!',
+    type: 'ad',
+    url: 'http://www.volkswagen.com'
+  },{
+    activationText: 'এই একটি বিজ্ঞাপন হয়',
+    id: 'Ad-7',
+    images: {
+      summary: 'style/images/wiggle-banner-125x104.jpg',
+      details: 'style/images/wiggle-banner-300x250.jpg'
+    },
+    text: 'এটি একটি সীমিত সময়ের অফার হয়',
+    type: 'ad',
+    url: 'http://www.wiggle.co.uk'
+  }];
 
   var OfferData = {
     activationText: 'এটি একটি বিশেষ বিজ্ঞাপন হয়',
@@ -21,8 +82,9 @@
       summary: 'style/images/20140411_firefox_assets_011_promo-card-grameenphone-image_SCALED-DOWN.png',
       details: 'style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png'
     },
-    text: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit',
-    type: 'telenor'
+    text: 'এখন সক্রিয় করুন!',
+    type: 'telenor',
+    url: 'http://www.grameenphone.com'
   };
 
   var ScrollDirection = {
@@ -68,8 +130,10 @@
           details = false, scrollDirection;
 
       el.addEventListener('gridpageshowend', function(e) {
+          document.querySelector('#footer').style.transform = "translateY(100%)";
       });
       el.addEventListener('gridpagehideend', function(e) {
+          document.querySelector('#footer').style.transform = "";
       });
 
       el.addEventListener('touchstart', function(e) {
@@ -145,8 +209,9 @@
         var ad = new Ad(i);
         var detailedAd = new DetailedAd();
         if (i % 5 !== 0) {
-          ad.setData(AdData);
-          detailedAd.setData(AdData);
+          var randomNumber = Math.floor(Math.random() * (7));
+          ad.setData(AdData[randomNumber]);
+          detailedAd.setData(AdData[randomNumber]);
         } else {
           ad.setData(OfferData);
           detailedAd.setData(OfferData);
@@ -183,6 +248,9 @@
   function OperatorCard() {
     this.domElement = document.createElement('div');
     this.domElement.classList.add('intro');
+    this.welcomeText = document.createElement('p');
+    this.welcomeText.textContent = 'Welcome to Specials';
+    this.domElement.appendChild(this.welcomeText);
   }
 
   function Ad(cardIndex) {
@@ -212,6 +280,7 @@
 
   function DetailedAd() {
     Card.call(this);
+    var self = this;
 
     this.image = document.createElement('img');
     this.image.classList.add('image');
@@ -225,6 +294,10 @@
     this.activationText.classList.add('activationText');
 
     this.activationButton.appendChild(this.activationText);
+    this.activationButton.addEventListener('touchend', function (e) {
+      e.stopPropagation();
+      self.activateAd();
+    });
 
     this.domElement.appendChild(this.image);
     this.domElement.appendChild(this.cardDetailsContainer);
@@ -242,6 +315,18 @@
     this.image.src = data.images.details;
     this.content.textContent = data.text;
     this.activationText.textContent = data.activationText;
+    this.url = data.url;
+  };
+
+  DetailedAd.prototype.activateAd = function () {
+    console.log('ad activated');
+    new MozActivity({
+      name: 'view',
+      data: {
+        type: 'url',
+        url: this.url
+      }
+    });
   };
 
   document.addEventListener('homescreen-ready', function(e) {
