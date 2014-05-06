@@ -99,8 +99,6 @@
   };
 
   var AdView = exports.AdView =  function(gridManager) {
-    var self = this;
-
     this.cardsList = {};
     this.summaryContainer = document.createElement('div');
     this.summaryContainer.id = 'summaryContainer';
@@ -112,113 +110,116 @@
     this.activeCard = null;
     this.dataStore = null;
     this.deviceId = null;
+    this.gridManager = gridManager;
+  };
 
-    this.createAdPage = function() {
-      // Insert the page
-      gridManager.pageHelper.addPage([], 0, 0);
-      // Then get the page (which will be at index 1)
-      var page = gridManager.pageHelper.getPage(1);
-      // Dont save this page as its dynamic
-      page.ignoreOnSave = true;
+  AdView.prototype.createAdPage = function() {
+    var self = this;
 
-      // And grab the element so we can do stuff with it
-      var el = gridManager.container.firstChild;
-      el.classList.add('ad-page');
+    // Insert the page
+    this.gridManager.pageHelper.addPage([], 0, 0);
+    // Then get the page (which will be at index 1)
+    var page = this.gridManager.pageHelper.getPage(1);
+    // Dont save this page as its dynamic
+    page.ignoreOnSave = true;
 
-      var startEvent, currentX, currentY, startX, startY, dx, dy,
-          detecting = false, swiping = false, scrolling = false,
-          details = false, scrollDirection;
+    // And grab the element so we can do stuff with it
+    var el = this.gridManager.container.firstChild;
+    el.classList.add('ad-page');
 
-      el.addEventListener('gridpageshowend', function(e) {
-          document.querySelector('#footer').style.transform = "translateY(100%)";
-      });
-      el.addEventListener('gridpagehideend', function(e) {
-          document.querySelector('#footer').style.transform = "";
-      });
+    var startEvent, currentX, currentY, startX, startY, dx, dy,
+        detecting = false, swiping = false, scrolling = false,
+        details = false, scrollDirection;
 
-      el.addEventListener('touchstart', function(e) {
-        startEvent = e;
-        swiping = false;
-        detecting = true;
-        startX = startEvent.touches[0].pageX;
-        startY = startEvent.touches[0].pageY;
-      });
-      el.addEventListener('touchmove', function(e) {
-        if (details) {
-          e.preventDefault();
-        }
-        if (detecting || scrolling) {
-          e.preventPanning = true;
-        }
-        if (detecting) {
-          currentX = e.touches[0].pageX;
-          currentY = e.touches[0].pageY;
-          dx = currentX - startX;
-          dy = currentY - startY;
-          if (dx < -25 && (dy > -15 || dy < 15)) {
-            detecting = scrolling = false;
-            swiping = true;
-          } else if (dx > -25 && (dy < -15 || dy > 15)) {
-            detecting = false;
-            scrolling = true;
-            if (dy < -15) {
-              scrollDirection = ScrollDirection.FORWARD;
-            } else {
-              scrollDirection = ScrollDirection.BACKWARD;
-            }
-          }
-        }
-      });
-      el.addEventListener('touchend', function(e) {
-        if (swiping === false && scrolling === false) {
-          if (details === false) {
-            var card = e.target.dataset.cardIndex;
-            if (card) {
-              self.openDetails(card);
-              details = true;
-            }
+    el.addEventListener('gridpageshowend', function(e) {
+        document.querySelector('#footer').style.transform = "translateY(100%)";
+    });
+    el.addEventListener('gridpagehideend', function(e) {
+        document.querySelector('#footer').style.transform = "";
+    });
+
+    el.addEventListener('touchstart', function(e) {
+      startEvent = e;
+      swiping = false;
+      detecting = true;
+      startX = startEvent.touches[0].pageX;
+      startY = startEvent.touches[0].pageY;
+    });
+    el.addEventListener('touchmove', function(e) {
+      if (details) {
+        e.preventDefault();
+      }
+      if (detecting || scrolling) {
+        e.preventPanning = true;
+      }
+      if (detecting) {
+        currentX = e.touches[0].pageX;
+        currentY = e.touches[0].pageY;
+        dx = currentX - startX;
+        dy = currentY - startY;
+        if (dx < -25 && (dy > -15 || dy < 15)) {
+          detecting = scrolling = false;
+          swiping = true;
+        } else if (dx > -25 && (dy < -15 || dy > 15)) {
+          detecting = false;
+          scrolling = true;
+          if (dy < -15) {
+            scrollDirection = ScrollDirection.FORWARD;
           } else {
-            self.closeDetails();
-            details = false;
-          }
-        } else if (scrolling === true && details === true) {
-          var card = self.currentCard;
-          card = scrollDirection === ScrollDirection.FORWARD ? card + 1 : card - 1;
-          if (card >= 0 && card < 50) {
-            self.showCardDetails(card);
+            scrollDirection = ScrollDirection.BACKWARD;
           }
         }
-        detecting = scrolling = false;
-      });
+      }
+    });
+    el.addEventListener('touchend', function(e) {
+      if (swiping === false && scrolling === false) {
+        if (details === false) {
+          var card = e.target.dataset.cardIndex;
+          if (card) {
+            self.openDetails(card);
+            details = true;
+          }
+        } else {
+          self.closeDetails();
+          details = false;
+        }
+      } else if (scrolling === true && details === true) {
+        var card = self.currentCard;
+        card = scrollDirection === ScrollDirection.FORWARD ? card + 1 : card - 1;
+        if (card >= 0 && card < 50) {
+          self.showCardDetails(card);
+        }
+      }
+      detecting = scrolling = false;
+    });
 
-      this.createCards();
+    this.createCards();
 
-      el.appendChild(this.summaryContainer);
-      this.detailsContainer.appendChild(this.detailsWrapper);
-      el.appendChild(this.detailsContainer);
+    el.appendChild(this.summaryContainer);
+    this.detailsContainer.appendChild(this.detailsWrapper);
+    el.appendChild(this.detailsContainer);
 
-      return el;
-    };
+    return el;
   };
 
   AdView.prototype.createCards = function() {
-      var operatorCard = new OperatorCard();
-      this.summaryContainer.appendChild(operatorCard.domElement);
+    var operatorCard = new OperatorCard();
+    this.summaryContainer.appendChild(operatorCard.domElement);
 
-      for (var i = 0; i < 50; i++) {
-        var ad = new Ad(i);
-        var detailedAd = new DetailedAd();
-        if (i % 5 !== 0) {
-          var randomNumber = Math.floor(Math.random() * (7));
-          ad.setData(AdData[randomNumber]);
-          detailedAd.setData(AdData[randomNumber]);
-        } else {
-          ad.setData(OfferData);
-          detailedAd.setData(OfferData);
-        }
-        this.summaryContainer.appendChild(ad.domElement);
-        this.detailsWrapper.appendChild(detailedAd.domElement);
+    for (var i = 0; i < 50; i++) {
+      var ad = new Ad(i);
+      var detailedAd = new DetailedAd();
+      if (i % 5 !== 0) {
+        var randomNumber = Math.floor(Math.random() * (7));
+        ad.setData(AdData[randomNumber]);
+        detailedAd.setData(AdData[randomNumber]);
+      } else {
+        ad.setData(OfferData);
+        detailedAd.setData(OfferData);
       }
+      this.summaryContainer.appendChild(ad.domElement);
+      this.detailsWrapper.appendChild(detailedAd.domElement);
+    }
   };
 
   AdView.prototype.showCardDetails = function (card) {
