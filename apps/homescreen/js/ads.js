@@ -93,13 +93,43 @@
   };
 
   var AdManager = exports.AdManager = function(adView) {
-    var self = this;
-
+    this.currentAds = [];
     this.view = adView;
   };
 
+  AdManager.prototype.sendAnalytics = function() {
+  
+  };
+
+  AdManager.prototype.fetchAds = function() {
+  
+  };
+
+  AdManager.prototype.manageAds = function(ads) {
+    // Make sure the ads are valid at this point.
+    this.currentAds = ads;
+    this.view.setAds(this.currentAds);
+  };
+
+  AdManager.prototype.setupAds = function() {
+    // Load all ads from the database on phone boot.
+    var currentAds = [];
+    for (var i = 0; i < 50; i++) {
+      if (i % 5 !== 0) {
+        var randomNumber = Math.floor(Math.random() * (7));
+        currentAds[i] = AdData[randomNumber];
+      } else {
+        currentAds[i] = OfferData;
+      }
+    }
+    this.manageAds(currentAds);
+  };
+
+  AdManager.prototype.removeAd = function(adId) {
+  
+  };
+
   var AdView = exports.AdView =  function(gridManager) {
-    this.cardsList = {};
     this.summaryContainer = document.createElement('div');
     this.summaryContainer.id = 'summaryContainer';
     this.detailsContainer = document.createElement('div');
@@ -107,7 +137,7 @@
     this.detailsWrapper = document.createElement('div');
     this.detailsWrapper.id = 'detailsWrapper';
 
-    this.activeCard = null;
+    this.cardsList = [];
     this.dataStore = null;
     this.deviceId = null;
     this.gridManager = gridManager;
@@ -132,10 +162,10 @@
         details = false, scrollDirection;
 
     el.addEventListener('gridpageshowend', function(e) {
-        document.querySelector('#footer').style.transform = "translateY(100%)";
+        document.querySelector('#footer').style.transform = 'translateY(100%)';
     });
     el.addEventListener('gridpagehideend', function(e) {
-        document.querySelector('#footer').style.transform = "";
+        document.querySelector('#footer').style.transform = '';
     });
 
     el.addEventListener('touchstart', function(e) {
@@ -205,41 +235,51 @@
   AdView.prototype.createCards = function() {
     var operatorCard = new OperatorCard();
     this.summaryContainer.appendChild(operatorCard.domElement);
+  };
 
-    for (var i = 0; i < 50; i++) {
-      var ad = new Ad(i);
-      var detailedAd = new DetailedAd();
-      if (i % 5 !== 0) {
-        var randomNumber = Math.floor(Math.random() * (7));
-        ad.setData(AdData[randomNumber]);
-        detailedAd.setData(AdData[randomNumber]);
-      } else {
-        ad.setData(OfferData);
-        detailedAd.setData(OfferData);
-      }
-      this.summaryContainer.appendChild(ad.domElement);
-      this.detailsWrapper.appendChild(detailedAd.domElement);
+  AdView.prototype.setAds = function(ads) {
+    var currentCards = document.querySelectorAll('#summaryContainer > .card');
+    var cardCount = currentCards.length;
+    for (var i = ads.length; i < cardCount; i++) {
+      // Remove some excess cards.
+      var card = this.cardsList.pop();
+      card.ad.domElement.parentNode.removeChild(card.ad.domElement);
+      card.detailedAd.domElement.parentNode.removeChild(card.detailedAd.domElement);
+    }
+    for (var i = cardCount; i < ads.length; i++) {
+      // Add some extra cards.
+      var card = {};
+      card.ad = new Ad(i);
+      card.detailedAd = new DetailedAd(i);
+      this.cardsList.push(card);
+      this.summaryContainer.appendChild(card.ad.domElement);
+      this.detailsWrapper.appendChild(card.detailedAd.domElement);
+    }
+
+    for (var i = 0; i < ads.length; i++) {
+      this.cardsList[i].ad.setData(ads[i]);
+      this.cardsList[i].detailedAd.setData(ads[i]);
     }
   };
 
-  AdView.prototype.showCardDetails = function (card) {
+  AdView.prototype.showCardDetails = function(card) {
     this.currentCard = card-0;
     var translateOffset = card === '0' ? 0 : (card * -395) + 20;
     this.detailsWrapper.style.transform = 'translateY(' + translateOffset + 'px)';
   };
 
-  AdView.prototype.openDetails = function (card) {
+  AdView.prototype.openDetails = function(card) {
     this.showCardDetails(card);
     this.detailsContainer.classList.add('active');
     setTimeout(function() {
       self.detailsWrapper.classList.add('active');
     }, 450);
-  }
+  };
 
-  AdView.prototype.closeDetails = function () {
+  AdView.prototype.closeDetails = function() {
     this.detailsContainer.classList.remove('active');
     this.detailsWrapper.classList.remove('active');
-  }
+  };
 
   function Card() {
     this.domElement = document.createElement('div');
@@ -270,7 +310,7 @@
 
   Ad.prototype.constructor = Ad;
 
-  Ad.prototype.setData = function (data) {
+  Ad.prototype.setData = function(data) {
     this.domElement.classList.add('ad');
     if (data.type === 'telenor') {
       this.domElement.classList.add('telenor');
@@ -279,10 +319,12 @@
     this.summaryContent.textContent = data.text;
   };
 
-  function DetailedAd() {
+  function DetailedAd(cardIndex) {
     Card.call(this);
     var self = this;
 
+    this.domElement.dataset.cardIndex = cardIndex;
+    
     this.image = document.createElement('img');
     this.image.classList.add('image');
     this.content = document.createElement('p');
@@ -295,7 +337,7 @@
     this.activationText.classList.add('activationText');
 
     this.activationButton.appendChild(this.activationText);
-    this.activationButton.addEventListener('touchend', function (e) {
+    this.activationButton.addEventListener('touchend', function(e) {
       e.stopPropagation();
       self.activateAd();
     });
@@ -308,7 +350,7 @@
 
   DetailedAd.prototype.constructor = DetailedAd;
 
-  DetailedAd.prototype.setData = function (data) {
+  DetailedAd.prototype.setData = function(data) {
     this.domElement.classList.add('ad');
     if (data.type === 'telenor') {
       this.domElement.classList.add('telenor');
@@ -319,7 +361,7 @@
     this.url = data.url;
   };
 
-  DetailedAd.prototype.activateAd = function () {
+  DetailedAd.prototype.activateAd = function() {
     console.log('ad activated');
     new MozActivity({
       name: 'view',
@@ -333,7 +375,8 @@
   document.addEventListener('homescreen-ready', function(e) {
     var adView = new AdView(window.GridManager);
     adView.createAdPage();
-    var adManager = new AdManager(AdView);
+    var adManager = new AdManager(adView);
+    adManager.setupAds();
 
     GridManager.goToLandingPage = function() {
       document.body.dataset.transitioning = 'true';
