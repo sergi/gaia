@@ -957,7 +957,7 @@ var GridManager = (function() {
 
     appMgr.oninstall = function oninstall(event) {
       if (Configurator.isSingleVariantReady) {
-        GridManager.install(event.application);
+        GridManager.install(event.application, 1);
       } else {
         pendingInstallRequests.push(event.application);
       }
