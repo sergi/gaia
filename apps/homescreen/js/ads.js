@@ -96,8 +96,8 @@
     this.currentAds = [];
     this.view = adView;
 
-    this.adsUrl = 'http://fxos-advertisements-dev.elasticbeanstalk.com/api/client/ads';
-    this.analyticsUrl = 'http://fxos-advertisements-dev.elasticbeanstalk.com/api/client/click';
+    this.adsUrl = 'http://fxosad.telenordigital.com/api/client/ads';
+    this.analyticsUrl = 'http://fxosad.telenordigital.com/api/client/click';
 
     document.addEventListener('ad-activated', this.sendAnalytics.bind(this));
     document.addEventListener('online', this.fetchAds.bind(this));
