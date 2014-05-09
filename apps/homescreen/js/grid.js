@@ -52,6 +52,7 @@ var GridManager = (function() {
 
   var pages = [];
   var currentPage = 0;
+  var globalOffset = 0;
 
   var saveStateTimeout = null;
 
@@ -629,7 +630,7 @@ var GridManager = (function() {
 
     pages.forEach(function checkIsEmpty(page, index) {
       // ignore the landing page
-      if (index === 0) {
+      if (index <= globalOffset) {
         return;
       }
 
@@ -791,6 +792,9 @@ var GridManager = (function() {
     }
   };
 
+  function globalPageOffset(offset) {
+    globalOffset = offset;
+  }
 
   /*
    * Look up Icon objects using a descriptor containing 'manifestURL'
@@ -957,7 +961,7 @@ var GridManager = (function() {
 
     appMgr.oninstall = function oninstall(event) {
       if (Configurator.isSingleVariantReady) {
-        GridManager.install(event.application, 1);
+        GridManager.install(event.application, globalOffset);
       } else {
         pendingInstallRequests.push(event.application);
       }
@@ -1611,6 +1615,8 @@ var GridManager = (function() {
 
     forgetIcon: forgetIcon,
 
-    rememberIcon: rememberIcon
+    rememberIcon: rememberIcon,
+
+    globalPageOffset: globalPageOffset
   };
 })();

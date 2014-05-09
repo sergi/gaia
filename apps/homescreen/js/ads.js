@@ -191,7 +191,6 @@
 
   AdManager.prototype.manageAds = function(ads) {
     // Make sure the ads are valid in this function.
-    console.log(ads);
     this.currentAds = ads;
     asyncStorage.setItem('Telenor-ads', this.currentAds);
     this.view.setAds(this.currentAds);
@@ -236,6 +235,7 @@
 
     // Insert the page
     this.gridManager.pageHelper.addPage([], 0, 0);
+    this.gridManager.globalPageOffset(1);
     // Then get the page (which will be at index 1)
     var page = this.gridManager.pageHelper.getPage(1);
     // Dont save this page as its dynamic
