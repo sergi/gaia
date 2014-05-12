@@ -3,90 +3,6 @@
 /*global GridManager MozActivity dump */
 (function(exports) {
 
-  var AdData = [{
-    activationText: 'এই একটি বিজ্ঞাপন হয়',
-    id: 'Ad-1',
-    image: 'style/images/20140411_firefox_assets_002_promo-card-image.png',
-    text: 'আমরা শীঘ্রই আপনাকে দেখতে আশা করি!',
-    type: 'ad',
-    action: {
-      type: 'url',
-      url: 'http://www.google.com/search?q=test'
-    }
-  },{
-    activationText: 'এই একটি বিজ্ঞাপন হয়',
-    id: 'Ad-2',
-    image: 'style/images/banner-publish-300x250.jpg',
-    text: 'আমরা শীঘ্রই আপনাকে দেখতে আশা করি!',
-    type: 'ad',
-    action: {
-      type: 'url',
-      url: 'http://www.google.com/search?q=publish'
-    }
-  },{
-    activationText: 'এই একটি বিজ্ঞাপন হয়',
-    id: 'Ad-3',
-    image: 'style/images/Coffeys-Coffee-300x250.jpg',
-    text: 'এখন আমাদের দেখার জন্য দয়া করে!',
-    type: 'ad',
-    action: {
-      type: 'url',
-      url: 'http://www.google.com/search?q=coffee'
-    }
-  },{
-    activationText: 'এই একটি বিজ্ঞাপন হয়',
-    id: 'Ad-4',
-    image: 'style/images/kfc-300x250.jpg',
-    text: 'আমরা শীঘ্রই আপনাকে দেখতে আশা করি!',
-    type: 'ad',
-    action: {
-      type: 'url',
-      url: 'http://www.kfc.com'
-    }
-  },{
-    activationText: 'এই একটি বিজ্ঞাপন হয়',
-    id: 'Ad-5',
-    image: 'style/images/landflip_300x250.png',
-    text: 'এটি একটি সীমিত সময়ের অফার হয়',
-    type: 'ad',
-    action: {
-      type: 'url',
-      url: 'http://www.google.com/search?q=landflip'
-    }
-  },{
-    activationText: 'এই একটি বিজ্ঞাপন হয়',
-    id: 'Ad-6',
-    image: 'style/images/VW_TouaregBoeing_300x250.jpg',
-    text: 'এখন আমাদের দেখার জন্য দয়া করে!',
-    type: 'ad',
-    action: {
-      type: 'url',
-      url: 'http://www.volkswagen.com'
-    }
-  },{
-    activationText: 'এই একটি বিজ্ঞাপন হয়',
-    id: 'Ad-7',
-    image: 'style/images/wiggle-banner-300x250.jpg',
-    text: 'এটি একটি সীমিত সময়ের অফার হয়',
-    type: 'ad',
-    action: {
-      type: 'url',
-      url: 'http://www.wiggle.co.uk'
-    }
-  }];
-
-  var OfferData = {
-    activationText: 'এটি একটি বিশেষ বিজ্ঞাপন হয়',
-    id: 'Offer',
-    image: 'style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png',
-    text: 'এখন সক্রিয় করুন!',
-    type: 'telenor',
-    action: {
-      type: 'url',
-      url: 'http://www.grameenphone.com'
-    }
-  };
-
   var ScrollDirection = {
     BACKWARD: 0,
     FORWARD: 1
@@ -467,17 +383,56 @@
     document.dispatchEvent(event);
   };
 
-  document.addEventListener('homescreen-ready', function(e) {
-    var adView = new AdView(window.GridManager);
-    adView.createAdPage();
-    var adManager = new AdManager(adView);
-    adManager.setupAds();
+  var AdUtils = exports.AdUtils = function (){};
 
-    GridManager.goToLandingPage = function() {
-      document.body.dataset.transitioning = 'true';
-      // if we have ads the home button should go to page 1, not 0
-      GridManager.goToPage(AdView ? 1 : 0);
-    };
+  AdUtils.findTelenorSIM = function() {
+    var ICCs = navigator.mozIccManager.iccIds;
+    for (var i = 0; i < ICCs.length; i++) {
+      var iccData = navigator.mozIccManager.getIccById(ICCs[i]);
+      if (iccData && iccData.cardState === 'ready') {
+        if ((iccData.iccInfo.mcc === '242' || iccData.iccInfo.mcc === '470')
+            && iccData.iccInfo.mnc === '01') {
+          return iccData;
+        }
+      }
+    }
+    return;
+  };
+
+  AdUtils.initializeSystem = function() {
+    if (!AdUtils.initialized) {
+      AdUtils.initialized = true;
+      var adView = new AdView(window.GridManager);
+      adView.createAdPage();
+      var adManager = new AdManager(adView);
+      adManager.setupAds();
+
+      GridManager.goToLandingPage = function() {
+        document.body.dataset.transitioning = 'true';
+        // if we have ads the home button should go to page 1, not 0
+        GridManager.goToPage(AdView ? 1 : 0);
+      };
+    }
+  }
+
+  document.addEventListener('homescreen-ready', function(e) {
+    if (AdUtils.findTelenorSIM()) {
+      AdUtils.initializeSystem();
+    } else {
+      var ICCs = navigator.mozIccManager.iccIds;
+      for (var i = 0; i < ICCs.length; i++) {
+        navigator.mozIccManager.getIccById(ICCs[i]).oniccinfochange = function(icc) {
+          if (icc.target.cardState === 'ready') {
+            if (AdUtils.findTelenorSIM()) {
+              AdUtils.initializeSystem();
+            } else {
+              navigator.mozIccManager.getIccById(icc.target.iccInfo.iccid)
+                .oniccinfochange = null;
+            }
+          }
+        };
+      }
+    }
   }, false);
 
 })(window);
