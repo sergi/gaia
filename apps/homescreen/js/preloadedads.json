@@ -1,552 +1,554 @@
-[
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
+{
+  "advertisements": [
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-7",
+      "image":"style/images/wiggle-banner-300x250.jpg",
+      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.wiggle.co.uk"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-1",
+      "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=test"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-3",
+      "image":"style/images/Coffeys-Coffee-300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=coffee"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-3",
+      "image":"style/images/Coffeys-Coffee-300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=coffee"
+      }
+    },
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-2",
+      "image":"style/images/banner-publish-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=publish"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-6",
+      "image":"style/images/VW_TouaregBoeing_300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.volkswagen.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-3",
+      "image":"style/images/Coffeys-Coffee-300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=coffee"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-3",
+      "image":"style/images/Coffeys-Coffee-300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=coffee"
+      }
+    },
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-7",
+      "image":"style/images/wiggle-banner-300x250.jpg",
+      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.wiggle.co.uk"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-1",
+      "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=test"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-2",
+      "image":"style/images/banner-publish-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=publish"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-1",
+      "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=test"
+      }
+    },
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-2",
+      "image":"style/images/banner-publish-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=publish"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-5",
+      "image":"style/images/landflip_300x250.png",
+      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=landflip"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-4",
+      "image":"style/images/kfc-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.kfc.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-2",
+      "image":"style/images/banner-publish-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=publish"
+      }
+    },
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-3",
+      "image":"style/images/Coffeys-Coffee-300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=coffee"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-3",
+      "image":"style/images/Coffeys-Coffee-300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=coffee"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-6",
+      "image":"style/images/VW_TouaregBoeing_300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.volkswagen.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-2",
+      "image":"style/images/banner-publish-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=publish"
+      }
+    },
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-5",
+      "image":"style/images/landflip_300x250.png",
+      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=landflip"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-6",
+      "image":"style/images/VW_TouaregBoeing_300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.volkswagen.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-1",
+      "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=test"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-4",
+      "image":"style/images/kfc-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.kfc.com"
+      }
+    },
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-4",
+      "image":"style/images/kfc-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.kfc.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-4",
+      "image":"style/images/kfc-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.kfc.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-2",
+      "image":"style/images/banner-publish-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=publish"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-6",
+      "image":"style/images/VW_TouaregBoeing_300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.volkswagen.com"
+      }
+    },
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-1",
+      "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=test"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-1",
+      "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=test"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-4",
+      "image":"style/images/kfc-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.kfc.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-4",
+      "image":"style/images/kfc-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.kfc.com"
+      }
+    },
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-7",
+      "image":"style/images/wiggle-banner-300x250.jpg",
+      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.wiggle.co.uk"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-5",
+      "image":"style/images/landflip_300x250.png",
+      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=landflip"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-2",
+      "image":"style/images/banner-publish-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=publish"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-4",
+      "image":"style/images/kfc-300x250.jpg",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.kfc.com"
+      }
+    },
+    {
+      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "id":"Offer",
+      "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
+      "text":"এখন সক্রিয় করুন!",
+      "type":"telenor",
+      "action":{
+        "type":"url",
+        "url":"http://www.grameenphone.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-6",
+      "image":"style/images/VW_TouaregBoeing_300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.volkswagen.com"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-7",
+      "image":"style/images/wiggle-banner-300x250.jpg",
+      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.wiggle.co.uk"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-1",
+      "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
+      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=test"
+      }
+    },
+    {
+      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "id":"Ad-3",
+      "image":"style/images/Coffeys-Coffee-300x250.jpg",
+      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "type":"ad",
+      "action":{
+        "type":"url",
+        "url":"http://www.google.com/search?q=coffee"
+      }
     }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-7",
-    "image":"style/images/wiggle-banner-300x250.jpg",
-    "text":"এটি একটি সীমিত সময়ের অফার হয়",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.wiggle.co.uk"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-1",
-    "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=test"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-3",
-    "image":"style/images/Coffeys-Coffee-300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=coffee"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-3",
-    "image":"style/images/Coffeys-Coffee-300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=coffee"
-    }
-  },
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-2",
-    "image":"style/images/banner-publish-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=publish"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-6",
-    "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.volkswagen.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-3",
-    "image":"style/images/Coffeys-Coffee-300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=coffee"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-3",
-    "image":"style/images/Coffeys-Coffee-300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=coffee"
-    }
-  },
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-7",
-    "image":"style/images/wiggle-banner-300x250.jpg",
-    "text":"এটি একটি সীমিত সময়ের অফার হয়",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.wiggle.co.uk"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-1",
-    "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=test"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-2",
-    "image":"style/images/banner-publish-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=publish"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-1",
-    "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=test"
-    }
-  },
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-2",
-    "image":"style/images/banner-publish-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=publish"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-5",
-    "image":"style/images/landflip_300x250.png",
-    "text":"এটি একটি সীমিত সময়ের অফার হয়",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=landflip"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-4",
-    "image":"style/images/kfc-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.kfc.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-2",
-    "image":"style/images/banner-publish-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=publish"
-    }
-  },
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-3",
-    "image":"style/images/Coffeys-Coffee-300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=coffee"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-3",
-    "image":"style/images/Coffeys-Coffee-300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=coffee"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-6",
-    "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.volkswagen.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-2",
-    "image":"style/images/banner-publish-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=publish"
-    }
-  },
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-5",
-    "image":"style/images/landflip_300x250.png",
-    "text":"এটি একটি সীমিত সময়ের অফার হয়",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=landflip"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-6",
-    "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.volkswagen.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-1",
-    "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=test"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-4",
-    "image":"style/images/kfc-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.kfc.com"
-    }
-  },
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-4",
-    "image":"style/images/kfc-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.kfc.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-4",
-    "image":"style/images/kfc-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.kfc.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-2",
-    "image":"style/images/banner-publish-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=publish"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-6",
-    "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.volkswagen.com"
-    }
-  },
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-1",
-    "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=test"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-1",
-    "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=test"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-4",
-    "image":"style/images/kfc-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.kfc.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-4",
-    "image":"style/images/kfc-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.kfc.com"
-    }
-  },
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-7",
-    "image":"style/images/wiggle-banner-300x250.jpg",
-    "text":"এটি একটি সীমিত সময়ের অফার হয়",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.wiggle.co.uk"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-5",
-    "image":"style/images/landflip_300x250.png",
-    "text":"এটি একটি সীমিত সময়ের অফার হয়",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=landflip"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-2",
-    "image":"style/images/banner-publish-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=publish"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-4",
-    "image":"style/images/kfc-300x250.jpg",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.kfc.com"
-    }
-  },
-  {
-    "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
-    "id":"Offer",
-    "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-    "text":"এখন সক্রিয় করুন!",
-    "type":"telenor",
-    "action":{
-      "type":"url",
-      "url":"http://www.grameenphone.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-6",
-    "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.volkswagen.com"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-7",
-    "image":"style/images/wiggle-banner-300x250.jpg",
-    "text":"এটি একটি সীমিত সময়ের অফার হয়",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.wiggle.co.uk"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-1",
-    "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-    "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=test"
-    }
-  },
-  {
-    "activationText":"এই একটি বিজ্ঞাপন হয়",
-    "id":"Ad-3",
-    "image":"style/images/Coffeys-Coffee-300x250.jpg",
-    "text":"এখন আমাদের দেখার জন্য দয়া করে!",
-    "type":"ad",
-    "action":{
-      "type":"url",
-      "url":"http://www.google.com/search?q=coffee"
-    }
-  }
-]
+  ]
+}

@@ -12,7 +12,7 @@
     this.currentAds = [];
     this.view = adView;
 
-    this.adsUrl = 'http://fxosad.telenordigital.com/api/client/ads';
+    this.adsUrl = 'http://fxosad.telenordigital.com/api/client/data';
     this.analyticsUrl = 'http://fxosad.telenordigital.com/api/client/click';
 
     document.addEventListener('ad-activated', this.sendAnalytics.bind(this));
@@ -106,8 +106,20 @@
   }
 
   AdManager.prototype.manageAds = function(ads) {
+    var advertisements = ads.advertisements;
+
+    var validAds = {};
+    validAds.advertisements = [];
     // Make sure the ads are valid in this function.
-    this.currentAds = ads;
+    for (var i = 0; i < advertisements.length; i++) {
+      if (advertisements[i].image) {
+        validAds.advertisements.push(advertisements[i]);
+      } else {
+        console.log('No valid image for ad: ' + advertisements[i].id);
+      }
+    }
+
+    this.currentAds = validAds;
     asyncStorage.setItem('Telenor-ads', this.currentAds);
     this.view.setAds(this.currentAds);
   };
@@ -120,7 +132,8 @@
         self.manageAds(ads)
       } else {
         self.loadFile('js/preloadedads.json', function(preloadedAds) {
-            self.manageAds(preloadedAds);
+            self.currentAds = preloadedAds;
+            self.view.setAds(self.currentAds);
           },
           function() {console.log('Error loading preloaded ads')});
       }
@@ -241,28 +254,27 @@
     this.summaryContainer.appendChild(operatorCard.domElement);
   };
 
-  AdView.prototype.setAds = function(ads) {
+  AdView.prototype.setAds = function(adsData) {
+    var ads = adsData.advertisements;
     var currentCards = document.querySelectorAll('#summaryContainer > .card');
     var cardCount = currentCards.length;
     for (var i = ads.length; i < cardCount; i++) {
       // Remove some excess cards.
       var card = this.cardsList.pop();
-      card.ad.domElement.parentNode.removeChild(card.ad.domElement);
-      card.detailedAd.domElement.parentNode.removeChild(card.detailedAd.domElement);
+      card.ad.summaryElement.parentNode.removeChild(card.ad.summaryElement);
+      card.ad.detailElement.parentNode.removeChild(card.ad.detailElement);
     }
     for (var i = cardCount; i < ads.length; i++) {
       // Add some extra cards.
       var card = {};
       card.ad = new Ad(i);
-      card.detailedAd = new DetailedAd(i);
       this.cardsList.push(card);
-      this.summaryContainer.appendChild(card.ad.domElement);
-      this.detailsWrapper.appendChild(card.detailedAd.domElement);
+      this.summaryContainer.appendChild(card.ad.summaryElement);
+      this.detailsWrapper.appendChild(card.ad.detailElement);
     }
 
     for (var i = 0; i < ads.length; i++) {
       this.cardsList[i].ad.setData(ads[i]);
-      this.cardsList[i].detailedAd.setData(ads[i]);
     }
   };
 
@@ -285,11 +297,6 @@
     this.detailsWrapper.classList.remove('active');
   };
 
-  function Card() {
-    this.domElement = document.createElement('div');
-    this.domElement.classList.add('card');
-  }
-
   function OperatorCard() {
     this.domElement = document.createElement('div');
     this.domElement.classList.add('intro');
@@ -299,35 +306,23 @@
   }
 
   function Ad(cardIndex) {
-    Card.call(this);
+    var self = this;
 
-    this.domElement.dataset.cardIndex = cardIndex;
+    this.summaryElement = document.createElement('div');
+    this.summaryElement.classList.add('card');
+    this.summaryElement.dataset.cardIndex = cardIndex;
 
     this.summaryImage = document.createElement('div');
     this.summaryImage.classList.add('summaryImage');
     this.summaryContent = document.createElement('p');
     this.summaryContent.classList.add('summaryContent');
 
-    this.domElement.appendChild(this.summaryImage);
-    this.domElement.appendChild(this.summaryContent);
-  }
+    this.summaryElement.appendChild(this.summaryImage);
+    this.summaryElement.appendChild(this.summaryContent);
 
-  Ad.prototype.constructor = Ad;
-
-  Ad.prototype.setData = function(data) {
-    this.domElement.classList.add('ad');
-    if (data.type === 'telenor') {
-      this.domElement.classList.add('telenor');
-    }
-    this.summaryImage.style.backgroundImage = 'url(' + data.image + ')';
-    this.summaryContent.textContent = data.text;
-  };
-
-  function DetailedAd(cardIndex) {
-    Card.call(this);
-    var self = this;
-
-    this.domElement.dataset.cardIndex = cardIndex;
+    this.detailElement = document.createElement('div');
+    this.detailElement.classList.add('card');
+    this.detailElement.dataset.cardIndex = cardIndex;
 
     this.image = document.createElement('img');
     this.image.classList.add('detailsImage');
@@ -346,27 +341,31 @@
       self.activateAd();
     });
 
-    this.domElement.appendChild(this.image);
-    this.domElement.appendChild(this.cardDetailsContainer);
-    this.domElement.appendChild(this.content);
-    this.domElement.appendChild(this.activationButton);
+    this.detailElement.appendChild(this.image);
+    this.detailElement.appendChild(this.cardDetailsContainer);
+    this.detailElement.appendChild(this.content);
+    this.detailElement.appendChild(this.activationButton);
   }
 
-  DetailedAd.prototype.constructor = DetailedAd;
-
-  DetailedAd.prototype.setData = function(data) {
+  Ad.prototype.setData = function(data) {
     this.cardData = data;
-    this.domElement.classList.add('ad');
+
+    this.summaryElement.classList.add('ad');
+    this.detailElement.classList.add('ad');
     if (data.type === 'telenor') {
-      this.domElement.classList.add('telenor');
+      this.summaryElement.classList.add('telenor');
+      this.detailElement.classList.add('telenor');
     }
+
+    this.summaryImage.style.backgroundImage = 'url(' + data.image + ')';
+    this.summaryContent.textContent = data.text;
     this.image.src = data.image;
     this.content.textContent = data.text;
     this.activationText.textContent = data.activationText;
     this.url = data.url;
   };
 
-  DetailedAd.prototype.activateAd = function() {
+  Ad.prototype.activateAd = function() {
     var data = this.cardData;
     switch(data.action.type) {
       case 'url':
