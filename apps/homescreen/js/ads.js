@@ -385,18 +385,26 @@
 
   var AdUtils = exports.AdUtils = function (){};
 
-  AdUtils.findTelenorSIM = function() {
+  AdUtils.findTelenorSims = function() {
     var ICCs = navigator.mozIccManager.iccIds;
+    var telenorSims = [];
     for (var i = 0; i < ICCs.length; i++) {
       var iccData = navigator.mozIccManager.getIccById(ICCs[i]);
       if (iccData && iccData.cardState === 'ready') {
         if ((iccData.iccInfo.mcc === '242' || iccData.iccInfo.mcc === '470')
             && iccData.iccInfo.mnc === '01') {
-          return iccData;
+          var simData = {};
+          simData.slot = i;
+          simData.iccData = iccData;
+          telenorSims.push(simData);
         }
       }
     }
-    return;
+    if (telenorSims.length > 0) {
+      return telenorSims;
+    } else {
+      return;
+    }
   };
 
   AdUtils.initializeSystem = function() {
@@ -416,14 +424,14 @@
   }
 
   document.addEventListener('homescreen-ready', function(e) {
-    if (AdUtils.findTelenorSIM()) {
+    if (AdUtils.findTelenorSims()) {
       AdUtils.initializeSystem();
     } else {
       var ICCs = navigator.mozIccManager.iccIds;
       for (var i = 0; i < ICCs.length; i++) {
         navigator.mozIccManager.getIccById(ICCs[i]).oniccinfochange = function(icc) {
           if (icc.target.cardState === 'ready') {
-            if (AdUtils.findTelenorSIM()) {
+            if (AdUtils.findTelenorSims()) {
               AdUtils.initializeSystem();
             } else {
               navigator.mozIccManager.getIccById(icc.target.iccInfo.iccid)
