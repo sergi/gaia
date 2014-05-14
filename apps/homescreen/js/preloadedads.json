@@ -1,10 +1,10 @@
 {
   "advertisements": [
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -12,10 +12,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-7",
       "image":"style/images/wiggle-banner-300x250.jpg",
-      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "descriptionText":"এটি একটি সীমিত সময়ের অফার হয়",
       "type":"ad",
       "action":{
         "type":"url",
@@ -23,10 +23,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-1",
       "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -34,10 +34,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-3",
       "image":"style/images/Coffeys-Coffee-300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -45,10 +45,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-3",
       "image":"style/images/Coffeys-Coffee-300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -56,10 +56,10 @@
       }
     },
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -67,10 +67,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-2",
       "image":"style/images/banner-publish-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -78,10 +78,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-6",
       "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -89,10 +89,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-3",
       "image":"style/images/Coffeys-Coffee-300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -100,10 +100,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-3",
       "image":"style/images/Coffeys-Coffee-300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -111,10 +111,10 @@
       }
     },
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -122,10 +122,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-7",
       "image":"style/images/wiggle-banner-300x250.jpg",
-      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "descriptionText":"এটি একটি সীমিত সময়ের অফার হয়",
       "type":"ad",
       "action":{
         "type":"url",
@@ -133,10 +133,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-1",
       "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -144,10 +144,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-2",
       "image":"style/images/banner-publish-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -155,10 +155,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-1",
       "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -166,10 +166,10 @@
       }
     },
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -177,10 +177,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-2",
       "image":"style/images/banner-publish-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -188,10 +188,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-5",
       "image":"style/images/landflip_300x250.png",
-      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "descriptionText":"এটি একটি সীমিত সময়ের অফার হয়",
       "type":"ad",
       "action":{
         "type":"url",
@@ -199,10 +199,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-4",
       "image":"style/images/kfc-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -210,10 +210,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-2",
       "image":"style/images/banner-publish-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -221,10 +221,10 @@
       }
     },
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -232,10 +232,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-3",
       "image":"style/images/Coffeys-Coffee-300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -243,10 +243,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-3",
       "image":"style/images/Coffeys-Coffee-300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -254,10 +254,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-6",
       "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -265,10 +265,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-2",
       "image":"style/images/banner-publish-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -276,10 +276,10 @@
       }
     },
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -287,10 +287,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-5",
       "image":"style/images/landflip_300x250.png",
-      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "descriptionText":"এটি একটি সীমিত সময়ের অফার হয়",
       "type":"ad",
       "action":{
         "type":"url",
@@ -298,10 +298,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-6",
       "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -309,10 +309,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-1",
       "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -320,10 +320,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-4",
       "image":"style/images/kfc-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -331,10 +331,10 @@
       }
     },
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -342,10 +342,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-4",
       "image":"style/images/kfc-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -353,10 +353,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-4",
       "image":"style/images/kfc-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -364,10 +364,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-2",
       "image":"style/images/banner-publish-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -375,10 +375,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-6",
       "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -386,10 +386,10 @@
       }
     },
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -397,10 +397,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-1",
       "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -408,10 +408,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-1",
       "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -419,10 +419,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-4",
       "image":"style/images/kfc-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -430,10 +430,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-4",
       "image":"style/images/kfc-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -441,10 +441,10 @@
       }
     },
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -452,10 +452,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-7",
       "image":"style/images/wiggle-banner-300x250.jpg",
-      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "descriptionText":"এটি একটি সীমিত সময়ের অফার হয়",
       "type":"ad",
       "action":{
         "type":"url",
@@ -463,10 +463,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-5",
       "image":"style/images/landflip_300x250.png",
-      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "descriptionText":"এটি একটি সীমিত সময়ের অফার হয়",
       "type":"ad",
       "action":{
         "type":"url",
@@ -474,10 +474,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-2",
       "image":"style/images/banner-publish-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -485,10 +485,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-4",
       "image":"style/images/kfc-300x250.jpg",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -496,10 +496,10 @@
       }
     },
     {
-      "activationText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
+      "buttonText":"এটি একটি বিশেষ বিজ্ঞাপন হয়",
       "id":"Offer",
       "image":"style/images/20140411_firefox_assets_003_promo-card-grameenphone-image.png",
-      "text":"এখন সক্রিয় করুন!",
+      "descriptionText":"এখন সক্রিয় করুন!",
       "type":"telenor",
       "action":{
         "type":"url",
@@ -507,10 +507,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-6",
       "image":"style/images/VW_TouaregBoeing_300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -518,10 +518,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-7",
       "image":"style/images/wiggle-banner-300x250.jpg",
-      "text":"এটি একটি সীমিত সময়ের অফার হয়",
+      "descriptionText":"এটি একটি সীমিত সময়ের অফার হয়",
       "type":"ad",
       "action":{
         "type":"url",
@@ -529,10 +529,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-1",
       "image":"style/images/20140411_firefox_assets_002_promo-card-image.png",
-      "text":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
+      "descriptionText":"আমরা শীঘ্রই আপনাকে দেখতে আশা করি!",
       "type":"ad",
       "action":{
         "type":"url",
@@ -540,10 +540,10 @@
       }
     },
     {
-      "activationText":"এই একটি বিজ্ঞাপন হয়",
+      "buttonText":"এই একটি বিজ্ঞাপন হয়",
       "id":"Ad-3",
       "image":"style/images/Coffeys-Coffee-300x250.jpg",
-      "text":"এখন আমাদের দেখার জন্য দয়া করে!",
+      "descriptionText":"এখন আমাদের দেখার জন্য দয়া করে!",
       "type":"ad",
       "action":{
         "type":"url",

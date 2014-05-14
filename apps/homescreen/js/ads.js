@@ -12,8 +12,9 @@
     this.currentAds = [];
     this.view = adView;
 
-    this.adsUrl = 'http://fxosad.telenordigital.com/api/client/data';
-    this.analyticsUrl = 'http://fxosad.telenordigital.com/api/client/click';
+    this.apiPrefix = 'http://fxosad.telenordigital.com'
+    this.adsUrl = this.apiPrefix + '/api/client/data';
+    this.analyticsUrl = this.apiPrefix + '/api/client/click';
 
     document.addEventListener('ad-activated', this.sendAnalytics.bind(this));
     document.addEventListener('online', this.fetchAds.bind(this));
@@ -28,14 +29,29 @@
     var self = this;
     if (event) {
       this.sendNetworkRequest('POST', this.analyticsUrl, event.detail)
-        .then(self.sendAnalytics(), self.storeAnalytics(event));
+        .then(self.sendAnalytics(), self.storeAnalytics(event.detail));
     } else {
       // Check if there are old events in the database which can be sent.
+      asyncStorage.getItem('Telenor-analytics', function(previousEvents) {
+      if (previousEvents) {
+        previousEvents = JSON.parse(previousEvents);
+        self.sendNetworkRequest('POST', self.analyticsUrl, previousEvents)
+          .then(function() {asyncStorage.removeItem('Telenor-analytics');});
+        }
+      });
     }
   };
 
   AdManager.prototype.storeAnalytics = function(event) {
-    console.log(event);
+    asyncStorage.getItem('Telenor-analytics', function(previousEvents) {
+      if (previousEvents) {
+        previousEvents = JSON.parse(previousEvents);
+        previousEvents.push(event[0]);
+      } else {
+        previousEvents = event;
+      }
+      asyncStorage.setItem('Telenor-analytics', JSON.stringify(previousEvents));
+    });
   };
 
   AdManager.prototype.loadFile = function (file, successCallback, errorCallback) {
@@ -91,11 +107,12 @@
   AdManager.prototype.fetchAds = function() {
     var self = this;
     this.sendNetworkRequest('GET', this.adsUrl).then(function (response) {
+      asyncStorage.setItem('Telenor-ads', JSON.parse(response));
       self.manageAds(JSON.parse(response));
     });
   };
 
-  AdManager.prototype.fetchImage = function(url) {
+  AdManager.prototype.fetchImageForAd = function(ad) {
     /* Flow:
      * 1. Check if the image is on the device.
      * 2a. if success: return the old one.
@@ -103,25 +120,61 @@
      * 2ba. if success: Store in DB and return local.
      * 2bb. if error: reject this ad.
      */
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      asyncStorage.getItem(ad.image, function(imageData) {
+        if (imageData) {
+          ad.imageData = imageData;
+          resolve(ad);
+        } else {
+          self.sendNetworkRequest('GET', self.apiPrefix + ad.image + '/base64').then(
+            function(response) {
+              asyncStorage.setItem(ad.image, response, function() {
+                ad.imageData = response;
+                resolve(ad);
+              });
+            },
+            function(error) {
+              reject(Error(error));
+            }
+          );
+        }
+      });
+    });
   }
 
   AdManager.prototype.manageAds = function(ads) {
+    var self = this;
     var advertisements = ads.advertisements;
+
+    if (this.currentAds && this.currentAds.length > 0) {
+      var lookup = {};
+      for (var i = 0, len = advertisements.length; i < len; i++) {
+        lookup[advertisements[i].id] = advertisements[i];
+      }
+      for (var i = 0; i < this.currentAds.length; i++) {
+        if (!lookup[this.currentAds[i].id]) {
+          this.removeAd(this.currentAds[i].id);
+        }
+      }
+    }
+
+    this.currentAds = [];
 
     var validAds = {};
     validAds.advertisements = [];
     // Make sure the ads are valid in this function.
+    console.log(advertisements.length);
     for (var i = 0; i < advertisements.length; i++) {
       if (advertisements[i].image) {
-        validAds.advertisements.push(advertisements[i]);
+        this.fetchImageForAd(advertisements[i]).then(function(ad) {
+          self.currentAds.push(ad);
+          self.view.setAds(self.currentAds);
+        });
       } else {
         console.log('No valid image for ad: ' + advertisements[i].id);
       }
     }
-
-    this.currentAds = validAds;
-    asyncStorage.setItem('Telenor-ads', this.currentAds);
-    this.view.setAds(this.currentAds);
   };
 
   AdManager.prototype.setupAds = function() {
@@ -132,7 +185,7 @@
         self.manageAds(ads)
       } else {
         self.loadFile('js/preloadedads.json', function(preloadedAds) {
-            self.currentAds = preloadedAds;
+            self.currentAds = preloadedAds.advertisements;
             self.view.setAds(self.currentAds);
           },
           function() {console.log('Error loading preloaded ads')});
@@ -143,6 +196,11 @@
 
   AdManager.prototype.removeAd = function(adId) {
     // Remove the images from an old ad from the DB.
+    var lookup = {};
+    for (var i = 0, len = this.currentAds.length; i < len; i++) {
+      lookup[this.currentAds[i].id] = this.currentAds[i];
+    }
+    asyncStorage.removeItem(lookup[adId].image);
   };
 
   var AdView = exports.AdView =  function(gridManager) {
@@ -255,7 +313,7 @@
   };
 
   AdView.prototype.setAds = function(adsData) {
-    var ads = adsData.advertisements;
+    var ads = adsData;
     var currentCards = document.querySelectorAll('#summaryContainer > .card');
     var cardCount = currentCards.length;
     for (var i = ads.length; i < cardCount; i++) {
@@ -332,10 +390,10 @@
     this.cardDetailsContainer.classList.add('cardDetailsContainer');
     this.activationButton = document.createElement('div');
     this.activationButton.classList.add('activationButton');
-    this.activationText = document.createElement('p');
-    this.activationText.classList.add('activationText');
+    this.buttonText = document.createElement('p');
+    this.buttonText.classList.add('buttonText');
 
-    this.activationButton.appendChild(this.activationText);
+    this.activationButton.appendChild(this.buttonText);
     this.activationButton.addEventListener('touchend', function(e) {
       e.stopPropagation();
       self.activateAd();
@@ -357,11 +415,11 @@
       this.detailElement.classList.add('telenor');
     }
 
-    this.summaryImage.style.backgroundImage = 'url(' + data.image + ')';
-    this.summaryContent.textContent = data.text;
-    this.image.src = data.image;
-    this.content.textContent = data.text;
-    this.activationText.textContent = data.activationText;
+    this.summaryImage.style.backgroundImage = 'url(' + data.imageData + ')';
+    this.summaryContent.textContent = data.descriptionText;
+    this.image.src = data.imageData;
+    this.content.textContent = data.descriptionText;
+    this.buttonText.textContent = data.buttonText;
     this.url = data.url;
   };
 
