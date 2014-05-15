@@ -13,10 +13,30 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   transform: translateX(-1000px); /* Put off screen as start, will move into screen via grid.js */
 }
 
+#sponsorBanner {
+  height: 82px;
+  position: fixed;
+  opacity: 0;
+  z-index: 1;
+}
+
+#sponsorBanner, #summaryContainer > .intro .sponsorBanner {
+  background-image: url(images/wiggle-banner-300x250.jpg);
+  width: 100%;
+  pointer-events: none;
+}
+
+#summaryContainer > .intro .sponsorBanner {
+  bottom: 0;
+  height: 82px;
+  left: 0;
+  position: absolute;
+}
+
 #summaryContainer {
   background-color: #fff;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: scroll;
   width: 100%;
 }
 
@@ -24,8 +44,9 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   align-items: center;
   background-color: #00a6d6 !important;
   display: flex;
-  height: 45%;
+  height: 216px;
   justify-content: center;
+  position: relative;
 }
 
 #summaryContainer > .intro p {
@@ -101,6 +122,7 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   transform: translateY(100%);
   width: 100%;
   will-change: transform;
+  z-index: 2;
 
   -moz-transition: 0.4s;
   -ms-transition: 0.4s;
@@ -136,10 +158,10 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
   display: flex;
   height: 40px;
   justify-content: center;
-  margin: 8px;
+  margin: 2%;
   pointer-events: all;
   position: absolute;
-  width: 284px;
+  width: 96%;
 }
 
 #detailsContainer .card .activationButton .buttonText {

@@ -206,6 +206,8 @@
   var AdView = exports.AdView =  function(gridManager) {
     this.summaryContainer = document.createElement('div');
     this.summaryContainer.id = 'summaryContainer';
+    this.sponsorBanner = document.createElement('div');
+    this.sponsorBanner.id = 'sponsorBanner';
     this.detailsContainer = document.createElement('div');
     this.detailsContainer.id = 'detailsContainer';
     this.detailsWrapper = document.createElement('div');
@@ -234,7 +236,8 @@
 
     var startEvent, currentX, currentY, startX, startY, dx, dy,
         detecting = false, swiping = false, scrolling = false,
-        details = false, scrollDirection;
+        details = false, scrollDirection, sponsorBannerVisible,
+        bannerHeight = 134;
 
     el.addEventListener('gridpageshowend', function(e) {
         document.querySelector('#footer').style.transform = 'translateY(100%)';
@@ -298,8 +301,19 @@
       detecting = scrolling = false;
     });
 
+    this.summaryContainer.addEventListener('scroll', function(e) {
+      if (e.target.scrollTop > bannerHeight && !sponsorBannerVisible) {
+        sponsorBannerVisible = true;
+        document.querySelector('#sponsorBanner').style.opacity = '1.0';
+      } else if (e.target.scrollTop < bannerHeight && sponsorBannerVisible) {
+        sponsorBannerVisible = false;
+        document.querySelector('#sponsorBanner').style.opacity = '0';
+      }
+    });
+
     this.createCards();
 
+    el.appendChild(this.sponsorBanner);
     el.appendChild(this.summaryContainer);
     this.detailsContainer.appendChild(this.detailsWrapper);
     el.appendChild(this.detailsContainer);
@@ -360,7 +374,10 @@
     this.domElement.classList.add('intro');
     this.welcomeText = document.createElement('p');
     this.welcomeText.textContent = 'Welcome to Specials';
+    this.sponsorBanner = document.createElement('div');
+    this.sponsorBanner.classList.add('sponsorBanner');
     this.domElement.appendChild(this.welcomeText);
+    this.domElement.appendChild(this.sponsorBanner);
   }
 
   function Ad(cardIndex) {
@@ -481,7 +498,7 @@
   }
 
   document.addEventListener('homescreen-ready', function(e) {
-    if (AdUtils.findTelenorSims()) {
+    /*if (AdUtils.findTelenorSims()) {
       AdUtils.initializeSystem();
     } else {
       var ICCs = navigator.mozIccManager.iccIds;
@@ -497,7 +514,8 @@
           }
         };
       }
-    }
+    }*/
+    AdUtils.initializeSystem();
   }, false);
 
 })(window);
