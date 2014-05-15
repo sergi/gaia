@@ -498,7 +498,7 @@
   }
 
   document.addEventListener('homescreen-ready', function(e) {
-    /*if (AdUtils.findTelenorSims()) {
+    if (AdUtils.findTelenorSims()) {
       AdUtils.initializeSystem();
     } else {
       var ICCs = navigator.mozIccManager.iccIds;
@@ -514,8 +514,7 @@
           }
         };
       }
-    }*/
-    AdUtils.initializeSystem();
+    }
   }, false);
 
 })(window);
