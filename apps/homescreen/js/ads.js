@@ -200,6 +200,8 @@
       }
       self.fetchAds();
     });
+    // Try fetching ads every 6 hours.
+    window.setInterval(this.fetchAds.bind(this), 6 * 60 * 60 * 1000);
   };
 
   AdManager.prototype.removeAd = function(adId) {
