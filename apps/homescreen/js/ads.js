@@ -164,15 +164,23 @@
     var validAds = {};
     validAds.advertisements = [];
     // Make sure the ads are valid in this function.
-    console.log(advertisements.length);
+    var currentDate = new Date();
     for (var i = 0; i < advertisements.length; i++) {
+      // Check if the ad contains an image.
       if (advertisements[i].image) {
-        this.fetchImageForAd(advertisements[i]).then(function(ad) {
-          self.currentAds.push(ad);
-          self.view.setAds(self.currentAds);
-        });
-      } else {
-        console.log('No valid image for ad: ' + advertisements[i].id);
+        var adAvailability = advertisements[i].availability;
+        // Check if the ad has a start and end date.
+        if (adAvailability && adAvailability.start && adAvailability.end) {
+          var startDate = new Date(adAvailability.start);
+          var endDate = new Date(adAvailability.end);
+          // Compare the date of the ad with the current time.
+          if (currentDate > startDate && currentDate < endDate) {
+            this.fetchImageForAd(advertisements[i]).then(function(ad) {
+              self.currentAds.push(ad);
+              self.view.setAds(self.currentAds);
+            });
+          }
+        }
       }
     }
   };
