@@ -113,34 +113,18 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
 }
 
 #detailsContainer {
-  background-color: #bbb;
-  background-image: url('images/20140411_firefox_assets_001_bgPattern.png');
+  background-color: rgba(48,48,48,0.9);
   height: 100%;
   overflow: hidden;
   position: absolute;
   top: 0px;
   transform: translateY(100%);
   width: 100%;
-  will-change: transform;
   z-index: 2;
-
-  -moz-transition: 0.4s;
-  -ms-transition: 0.4s;
-  -o-transition: 0.4s;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
 }
 
 #detailsContainer.active {
   transform: translateY(0);
-}
-
-#detailsWrapper.active {
-  -moz-transition: 0.25s;
-  -ms-transition: 0.25s;
-  -o-transition: 0.25s;
-  -webkit-transition: 0.25s;
-  transition: 0.25s;
 }
 
 #detailsContainer .card {
@@ -181,10 +165,5 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
 
 #detailsContainer .telenor {
   border-color: #0493c8;
-}
-
-#detailsWrapper {
-  pointer-events: none;
-  will-change: transform;
 }
 

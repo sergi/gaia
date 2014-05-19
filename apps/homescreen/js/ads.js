@@ -3,11 +3,6 @@
 /*global GridManager MozActivity dump */
 (function(exports) {
 
-  var ScrollDirection = {
-    BACKWARD: 0,
-    FORWARD: 1
-  };
-
   var AdManager = exports.AdManager = function(adView) {
     this.currentAds = [];
     this.view = adView;
@@ -220,8 +215,6 @@
     this.sponsorBanner.id = 'sponsorBanner';
     this.detailsContainer = document.createElement('div');
     this.detailsContainer.id = 'detailsContainer';
-    this.detailsWrapper = document.createElement('div');
-    this.detailsWrapper.id = 'detailsWrapper';
 
     this.cardsList = [];
     this.dataStore = null;
@@ -246,8 +239,7 @@
 
     var startEvent, currentX, currentY, startX, startY, dx, dy,
         detecting = false, swiping = false, scrolling = false,
-        details = false, scrollDirection, sponsorBannerVisible,
-        bannerHeight = 134;
+        details = false, sponsorBannerVisible, bannerHeight = 134;
 
     el.addEventListener('gridpageshowend', function(e) {
         document.querySelector('#footer').style.transform = 'translateY(100%)';
@@ -281,11 +273,6 @@
         } else if (dx > -25 && (dy < -15 || dy > 15)) {
           detecting = false;
           scrolling = true;
-          if (dy < -15) {
-            scrollDirection = ScrollDirection.FORWARD;
-          } else {
-            scrollDirection = ScrollDirection.BACKWARD;
-          }
         }
       }
     });
@@ -300,12 +287,6 @@
         } else {
           self.closeDetails();
           details = false;
-        }
-      } else if (scrolling === true && details === true) {
-        var card = self.currentCard;
-        card = scrollDirection === ScrollDirection.FORWARD ? card + 1 : card - 1;
-        if (card >= 0 && card < self.cardsList.length) {
-          self.showCardDetails(card);
         }
       }
       detecting = scrolling = false;
@@ -325,15 +306,16 @@
 
     el.appendChild(this.sponsorBanner);
     el.appendChild(this.summaryContainer);
-    this.detailsContainer.appendChild(this.detailsWrapper);
     el.appendChild(this.detailsContainer);
 
     return el;
   };
 
   AdView.prototype.createCards = function() {
-    var operatorCard = new OperatorCard();
-    this.summaryContainer.appendChild(operatorCard.domElement);
+    this.operatorCard = new OperatorCard();
+    this.summaryContainer.appendChild(this.operatorCard.domElement);
+    this.detailedCard = new DetailedCard();
+    this.detailsContainer.appendChild(this.detailedCard.domElement);
   };
 
   AdView.prototype.setAds = function(adsData) {
@@ -344,7 +326,6 @@
       // Remove some excess cards.
       var card = this.cardsList.pop();
       card.ad.summaryElement.parentNode.removeChild(card.ad.summaryElement);
-      card.ad.detailElement.parentNode.removeChild(card.ad.detailElement);
     }
     for (var i = cardCount; i < ads.length; i++) {
       // Add some extra cards.
@@ -352,7 +333,6 @@
       card.ad = new Ad(i);
       this.cardsList.push(card);
       this.summaryContainer.appendChild(card.ad.summaryElement);
-      this.detailsWrapper.appendChild(card.ad.detailElement);
     }
 
     for (var i = 0; i < ads.length; i++) {
@@ -362,24 +342,58 @@
 
   AdView.prototype.showCardDetails = function(card) {
     this.currentCard = card-0;
-    var translateOffset = card === '0' ? 0 : (card * -395) + 20;
-    this.detailsWrapper.style.transform = 'translateY(' + translateOffset + 'px)';
+    this.detailedCard.setData(this.cardsList[this.currentCard].ad.cardData);
   };
 
   AdView.prototype.openDetails = function(card) {
     this.showCardDetails(card);
     this.detailsContainer.classList.add('active');
-    setTimeout(function() {
-      self.detailsWrapper.classList.add('active');
-    }, 450);
   };
 
   AdView.prototype.closeDetails = function() {
     this.detailsContainer.classList.remove('active');
-    this.detailsWrapper.classList.remove('active');
   };
 
-  function OperatorCard() {
+  var DetailedCard = function() {
+    this.domElement = document.createElement('div');
+    this.domElement.classList.add('card');
+
+    this.image = document.createElement('img');
+    this.image.classList.add('detailsImage');
+    this.content = document.createElement('p');
+    this.content.classList.add('content');
+    this.cardDetailsContainer = document.createElement('div');
+    this.cardDetailsContainer.classList.add('cardDetailsContainer');
+    this.activationButton = document.createElement('div');
+    this.activationButton.classList.add('activationButton');
+    this.buttonText = document.createElement('p');
+    this.buttonText.classList.add('buttonText');
+
+    this.activationButton.appendChild(this.buttonText);
+    this.activationButton.addEventListener('touchend', function(e) {
+      e.stopPropagation();
+      self.activateAd();
+    });
+
+    this.domElement.appendChild(this.image);
+    this.domElement.appendChild(this.cardDetailsContainer);
+    this.domElement.appendChild(this.content);
+    this.domElement.appendChild(this.activationButton);
+  };
+
+  DetailedCard.prototype.setData = function (data) {
+    this.domElement.classList.add('ad');
+    if (data.type === 'telenor') {
+      this.domElement.classList.add('telenor');
+    }
+
+    this.image.src = data.imageData;
+    this.content.textContent = data.descriptionText;
+    this.buttonText.textContent = data.buttonText;
+    this.url = data.url;
+  }
+
+  var OperatorCard = function () {
     this.domElement = document.createElement('div');
     this.domElement.classList.add('intro');
     this.welcomeText = document.createElement('p');
@@ -404,39 +418,12 @@
 
     this.summaryElement.appendChild(this.summaryImage);
     this.summaryElement.appendChild(this.summaryContent);
-
-    this.detailElement = document.createElement('div');
-    this.detailElement.classList.add('card');
-    this.detailElement.dataset.cardIndex = cardIndex;
-
-    this.image = document.createElement('img');
-    this.image.classList.add('detailsImage');
-    this.content = document.createElement('p');
-    this.content.classList.add('content');
-    this.cardDetailsContainer = document.createElement('div');
-    this.cardDetailsContainer.classList.add('cardDetailsContainer');
-    this.activationButton = document.createElement('div');
-    this.activationButton.classList.add('activationButton');
-    this.buttonText = document.createElement('p');
-    this.buttonText.classList.add('buttonText');
-
-    this.activationButton.appendChild(this.buttonText);
-    this.activationButton.addEventListener('touchend', function(e) {
-      e.stopPropagation();
-      self.activateAd();
-    });
-
-    this.detailElement.appendChild(this.image);
-    this.detailElement.appendChild(this.cardDetailsContainer);
-    this.detailElement.appendChild(this.content);
-    this.detailElement.appendChild(this.activationButton);
   }
 
   Ad.prototype.setData = function(data) {
     this.cardData = data;
 
     this.summaryElement.classList.add('ad');
-    this.detailElement.classList.add('ad');
     if (data.type === 'telenor') {
       this.summaryElement.classList.add('telenor');
       this.detailElement.classList.add('telenor');
@@ -444,10 +431,6 @@
 
     this.summaryImage.style.backgroundImage = 'url(' + data.imageData + ')';
     this.summaryContent.textContent = data.descriptionText;
-    this.image.src = data.imageData;
-    this.content.textContent = data.descriptionText;
-    this.buttonText.textContent = data.buttonText;
-    this.url = data.url;
   };
 
   Ad.prototype.activateAd = function() {
