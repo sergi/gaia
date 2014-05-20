@@ -212,7 +212,14 @@
     for (var i = 0, len = this.currentAds.length; i < len; i++) {
       lookup[this.currentAds[i].id] = this.currentAds[i];
     }
-    asyncStorage.removeItem(lookup[adId].image);
+
+    if (lookup[adId].image) {
+      asyncStorage.getItem(lookup[adId].image, function(image) {
+        if (image) {
+          asyncStorage.removeItem(lookup[adId].image);
+        };
+      });
+    }
   };
 
   var AdView = exports.AdView =  function(gridManager) {
@@ -427,7 +434,7 @@
     this.image.src = data.imageData;
     this.content.textContent = data.descriptionText;
     this.buttonText.textContent = data.buttonText;
-    this.url = data.url;
+    this.action = data.action;
   }
 
   var OperatorCard = function () {
@@ -443,7 +450,6 @@
       var hasRefreshLock = navigator.mozSettings.createLock();
       var hasRefresh = hasRefreshLock.get('adsRefreshButton.enabled');
         hasRefresh.onsuccess = (function() {
-          console.log(hasRefresh);
           if (hasRefresh.result['adsRefreshButton.enabled']) { 
             self.fetchIcon = document.createElement('p');
             self.fetchIcon.classList.add('fetchIcon');
@@ -483,7 +489,6 @@
     this.summaryElement.classList.add('ad');
     if (data.type === 'telenor') {
       this.summaryElement.classList.add('telenor');
-      this.detailElement.classList.add('telenor');
     }
 
     this.summaryImage.style.backgroundImage = 'url(' + data.imageData + ')';
@@ -531,7 +536,7 @@
   }
 
   document.addEventListener('homescreen-ready', function(e) {
-    /*if (AdUtils.findTelenorSims()) {
+    if (AdUtils.findTelenorSims()) {
       AdUtils.initializeSystem();
     } else {
       var ICCs = navigator.mozIccManager.iccIds;
@@ -547,8 +552,7 @@
           }
         };
       }
-    }*/
-    AdUtils.initializeSystem();
+    }
   }, false);
 
 })(window);

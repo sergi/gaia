@@ -55,9 +55,10 @@ body[data-transitioning] #paginationBar, body.ad #paginationBar {
 
 #summaryContainer > .intro .fetchIcon {
   font-size: 24pt;
+  margin: 0;
   position: absolute;
   right: 10px;
-  top: 10px;
+  top: 0;
 }
 
 #summaryContainer > .card {
