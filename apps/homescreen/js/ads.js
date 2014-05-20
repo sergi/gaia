@@ -154,11 +154,11 @@
       }
     }
 
+    // Reset the current advertisements to avoid duplicates.
     this.currentAds = [];
 
-    var validAds = {};
-    validAds.advertisements = [];
     // Make sure the ads are valid in this function.
+    var validAds = [];
     var currentDate = new Date();
     for (var i = 0; i < advertisements.length; i++) {
       // Check if the ad contains an image.
@@ -170,13 +170,18 @@
           var endDate = new Date(adAvailability.end);
           // Compare the date of the ad with the current time.
           if (currentDate > startDate && currentDate < endDate) {
-            this.fetchImageForAd(advertisements[i]).then(function(ad) {
-              self.currentAds.push(ad);
-              self.view.setAds(self.currentAds);
-            });
+            validAds.push(advertisements[i]);
           }
         }
       }
+    }
+
+    // the ads now have valid data, try loading the images and rendering them.
+    for (var i = 0; i < validAds.length; i++) {
+      this.fetchImageForAd(validAds[i]).then(function(ad) {
+        self.currentAds.push(ad);
+        self.view.setAds(self.currentAds);
+      });
     }
   };
 
@@ -193,8 +198,9 @@
           },
           function() {console.log('Error loading preloaded ads')});
       }
-      self.fetchAds();
     });
+    // Try fetching ads 10 seconds after device boot.
+    window.setTimeout(this.fetchAds.bind(this), 10000);
     // Try fetching ads every 6 hours.
     window.setInterval(this.fetchAds.bind(this), 6 * 60 * 60 * 1000);
   };
@@ -218,8 +224,11 @@
 
     this.cardsList = [];
     this.dataStore = null;
+    this.detailsVisible = false;
     this.deviceId = null;
     this.gridManager = gridManager;
+
+    document.addEventListener('close-details', this.closeDetails.bind(this));
   };
 
   AdView.prototype.createAdPage = function() {
@@ -239,7 +248,7 @@
 
     var startEvent, currentX, currentY, startX, startY, dx, dy,
         detecting = false, swiping = false, scrolling = false,
-        details = false, sponsorBannerVisible, bannerHeight = 134;
+        sponsorBannerVisible, bannerHeight = 134;
 
     el.addEventListener('gridpageshowend', function(e) {
         document.querySelector('#footer').style.transform = 'translateY(100%)';
@@ -256,7 +265,7 @@
       startY = startEvent.touches[0].pageY;
     });
     el.addEventListener('touchmove', function(e) {
-      if (details) {
+      if (self.detailsVisible) {
         e.preventDefault();
       }
       if (detecting || scrolling) {
@@ -278,15 +287,11 @@
     });
     el.addEventListener('touchend', function(e) {
       if (swiping === false && scrolling === false) {
-        if (details === false) {
+        if (self.detailsVisible === false) {
           var card = e.target.dataset.cardIndex;
           if (card) {
             self.openDetails(card);
-            details = true;
           }
-        } else {
-          self.closeDetails();
-          details = false;
         }
       }
       detecting = scrolling = false;
@@ -340,24 +345,30 @@
     }
   };
 
-  AdView.prototype.showCardDetails = function(card) {
+  AdView.prototype.updateDetailsCard = function(card) {
     this.currentCard = card-0;
     this.detailedCard.setData(this.cardsList[this.currentCard].ad.cardData);
   };
 
   AdView.prototype.openDetails = function(card) {
-    this.showCardDetails(card);
+    this.detailsVisible = true;
+    this.updateDetailsCard(card);
     this.detailsContainer.classList.add('active');
   };
 
   AdView.prototype.closeDetails = function() {
+    this.detailsVisible = false;
     this.detailsContainer.classList.remove('active');
   };
 
   var DetailedCard = function() {
+    var self = this;
+
     this.domElement = document.createElement('div');
     this.domElement.classList.add('card');
 
+    this.closeButton = document.createElement('div');
+    this.closeButton.classList.add('closeButton');
     this.image = document.createElement('img');
     this.image.classList.add('detailsImage');
     this.content = document.createElement('p');
@@ -369,19 +380,44 @@
     this.buttonText = document.createElement('p');
     this.buttonText.classList.add('buttonText');
 
+    this.closeButton.addEventListener('touchend', function(e) {
+      var event = new Event('close-details');
+      document.dispatchEvent(event);
+    });
+
     this.activationButton.appendChild(this.buttonText);
     this.activationButton.addEventListener('touchend', function(e) {
       e.stopPropagation();
-      self.activateAd();
+      self.activate();
     });
 
+    this.domElement.appendChild(this.closeButton);
     this.domElement.appendChild(this.image);
     this.domElement.appendChild(this.cardDetailsContainer);
     this.domElement.appendChild(this.content);
     this.domElement.appendChild(this.activationButton);
   };
 
+  DetailedCard.prototype.activate = function() {
+    var data = this.cardData;
+    switch(data.action.type) {
+      case 'url':
+        new MozActivity({name: 'view', data: {type: 'url', url: data.action.url}});
+        break;
+      case 'call':
+        new MozActivity({name: 'dial', data: {type: 'webtelephony/number',
+            number: data.action.phoneNumber}});
+        break;
+    }
+    var eventData = [];
+    eventData.push({'advertisement': data.id, 'timestamp': new Date().toISOString()});
+    var event = new CustomEvent('ad-activated', {'detail': eventData});
+    document.dispatchEvent(event);
+  };
+
   DetailedCard.prototype.setData = function (data) {
+    this.cardData = data;
+
     this.domElement.classList.add('ad');
     if (data.type === 'telenor') {
       this.domElement.classList.add('telenor');
@@ -431,23 +467,6 @@
 
     this.summaryImage.style.backgroundImage = 'url(' + data.imageData + ')';
     this.summaryContent.textContent = data.descriptionText;
-  };
-
-  Ad.prototype.activateAd = function() {
-    var data = this.cardData;
-    switch(data.action.type) {
-      case 'url':
-        new MozActivity({name: 'view', data: {type: 'url', url: data.action.url}});
-        break;
-      case 'call':
-        new MozActivity({name: 'dial', data: {type: 'webtelephony/number',
-            number: data.action.phoneNumber}});
-        break;
-    }
-    var eventData = [];
-    eventData.push({'advertisement': data.id, 'timestamp': new Date().toISOString()});
-    var event = new CustomEvent('ad-activated', {'detail': eventData});
-    document.dispatchEvent(event);
   };
 
   var AdUtils = exports.AdUtils = function (){};
