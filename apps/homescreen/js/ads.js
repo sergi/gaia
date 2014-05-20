@@ -12,6 +12,7 @@
     this.analyticsUrl = this.apiPrefix + '/api/client/click';
 
     document.addEventListener('ad-activated', this.sendAnalytics.bind(this));
+    document.addEventListener('fetch-ads', this.fetchAds.bind(this));
     document.addEventListener('online', this.fetchAds.bind(this));
   };
 
@@ -433,9 +434,29 @@
     this.domElement = document.createElement('div');
     this.domElement.classList.add('intro');
     this.welcomeText = document.createElement('p');
-    this.welcomeText.textContent = 'Welcome to Specials';
+    this.welcomeText.textContent = 'Welcome to Specials ';
     this.sponsorBanner = document.createElement('div');
     this.sponsorBanner.classList.add('sponsorBanner');
+
+    if (navigator.mozSettings) {
+      var self = this;
+      var hasRefreshLock = navigator.mozSettings.createLock();
+      var hasRefresh = hasRefreshLock.get('adsRefreshButton.enabled');
+        hasRefresh.onsuccess = (function() {
+          console.log(hasRefresh);
+          if (hasRefresh.result['adsRefreshButton.enabled']) { 
+            self.fetchIcon = document.createElement('p');
+            self.fetchIcon.classList.add('fetchIcon');
+            self.fetchIcon.textContent = '↻';
+            self.fetchIcon.addEventListener('touchend', function() {
+              var event = new Event('fetch-ads');
+              document.dispatchEvent(event);
+            });
+          self.domElement.appendChild(self.fetchIcon);
+        }
+      });
+    }
+    
     this.domElement.appendChild(this.welcomeText);
     this.domElement.appendChild(this.sponsorBanner);
   }
@@ -510,7 +531,7 @@
   }
 
   document.addEventListener('homescreen-ready', function(e) {
-    if (AdUtils.findTelenorSims()) {
+    /*if (AdUtils.findTelenorSims()) {
       AdUtils.initializeSystem();
     } else {
       var ICCs = navigator.mozIccManager.iccIds;
@@ -526,7 +547,8 @@
           }
         };
       }
-    }
+    }*/
+    AdUtils.initializeSystem();
   }, false);
 
 })(window);

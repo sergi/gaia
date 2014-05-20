@@ -135,6 +135,8 @@ function execute(config) {
     settings['lockscreen.locked'] = false;
   }
 
+  settings['adsRefreshButton.enabled'] = config.ADS_REFRESH === '1';
+  
   var queue = utils.Q.defer();
   queue.resolve();
 
