@@ -416,6 +416,10 @@
         new MozActivity({name: 'dial', data: {type: 'webtelephony/number',
             number: data.action.phoneNumber}});
         break;
+      case 'sms':
+        new MozActivity({name: 'new', data: {type: 'websms/sms',
+            number: data.action.phoneNumber, body: data.action.smsMessage}});
+        break;
     }
     var eventData = [];
     eventData.push({'advertisement': data.id, 'timestamp': new Date().toISOString()});

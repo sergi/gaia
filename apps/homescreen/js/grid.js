@@ -1241,7 +1241,7 @@ var GridManager = (function() {
     } else {
       var svApp = getSingleVariantApp(app.manifestURL);
       if (svApp && !isPreviouslyInstalled(app.manifestURL)) {
-        index = svApp.screen;
+        index = svApp.screen + globalOffset;
         icon.descriptor.desiredPos = svApp.location;
         if (!Configurator.isSimPresentOnFirstBoot && index < pages.length &&
             !pages[index].hasEmptySlot()) {
