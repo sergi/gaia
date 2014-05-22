@@ -25,17 +25,18 @@
     var self = this;
     if (event) {
       this.sendNetworkRequest('POST', this.analyticsUrl, event.detail)
-        .then(self.sendAnalytics(), self.storeAnalytics(event.detail));
-    } else {
-      // Check if there are old events in the database which can be sent.
-      asyncStorage.getItem('Telenor-analytics', function(previousEvents) {
-      if (previousEvents) {
-        previousEvents = JSON.parse(previousEvents);
-        self.sendNetworkRequest('POST', self.analyticsUrl, previousEvents)
-          .then(function() {asyncStorage.removeItem('Telenor-analytics');});
-        }
-      });
+        .then(self.sendStoredAnalytics(), self.storeAnalytics(event.detail));
     }
+  };
+
+  AdManager.prototype.sendStoredAnalytics = function() {
+    asyncStorage.getItem('Telenor-analytics', function(previousEvents) {
+    if (previousEvents) {
+      previousEvents = JSON.parse(previousEvents);
+      self.sendNetworkRequest('POST', self.analyticsUrl, previousEvents)
+        .then(function() {asyncStorage.removeItem('Telenor-analytics');});
+      }
+    });
   };
 
   AdManager.prototype.storeAnalytics = function(event) {
