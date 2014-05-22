@@ -9,9 +9,9 @@
 
     this.apiPrefix = 'http://fxosad.telenordigital.com'
     this.adsUrl = this.apiPrefix + '/api/client/data';
-    this.analyticsUrl = this.apiPrefix + '/api/client/click';
+    this.analyticsUrl = this.apiPrefix + '/api/analytics';
 
-    document.addEventListener('ad-activated', this.sendAnalytics.bind(this));
+    document.addEventListener('ad-analytics', this.sendAnalytics.bind(this));
     document.addEventListener('fetch-ads', this.fetchAds.bind(this));
     document.addEventListener('online', this.fetchAds.bind(this));
   };
@@ -30,6 +30,7 @@
   };
 
   AdManager.prototype.sendStoredAnalytics = function() {
+    var self = this;
     asyncStorage.getItem('Telenor-analytics', function(previousEvents) {
     if (previousEvents) {
       previousEvents = JSON.parse(previousEvents);
@@ -354,15 +355,20 @@
     }
   };
 
-  AdView.prototype.updateDetailsCard = function(card) {
-    this.currentCard = card-0;
-    this.detailedCard.setData(this.cardsList[this.currentCard].ad.cardData);
-  };
-
   AdView.prototype.openDetails = function(card) {
-    this.detailsVisible = true;
-    this.updateDetailsCard(card);
+    this.currentCard = card-0;
+    var currentCardData = this.cardsList[this.currentCard].ad.cardData;
+    this.detailedCard.setData(currentCardData);
+
     this.detailsContainer.classList.add('active');
+    this.detailsVisible = true;
+
+    var eventData = [];
+    var card = {};
+    card.id = currentCardData.id
+    eventData.push({'card': card, 'timestamp': new Date().toISOString(), type: 'view'});
+    var event = new CustomEvent('ad-analytics', {'detail': eventData});
+    document.dispatchEvent(event);
   };
 
   AdView.prototype.closeDetails = function() {
@@ -374,10 +380,12 @@
     var self = this;
 
     this.domElement = document.createElement('div');
-    this.domElement.classList.add('card');
 
     this.closeButton = document.createElement('div');
     this.closeButton.classList.add('closeButton');
+    var closeText = document.createElement('p');
+    closeText.textContent = 'X';
+    this.closeButton.appendChild(closeText);
     this.image = document.createElement('img');
     this.image.classList.add('detailsImage');
     this.content = document.createElement('p');
@@ -423,18 +431,19 @@
         break;
     }
     var eventData = [];
-    eventData.push({'advertisement': data.id, 'timestamp': new Date().toISOString()});
-    var event = new CustomEvent('ad-activated', {'detail': eventData});
+    var card = {};
+    card.id = data.id
+    eventData.push({'card': card, 'timestamp': new Date().toISOString(), type: 'click'});
+    var event = new CustomEvent('ad-analytics', {'detail': eventData});
     document.dispatchEvent(event);
   };
 
   DetailedCard.prototype.setData = function (data) {
     this.cardData = data;
 
-    this.domElement.classList.add('ad');
-    if (data.type === 'telenor') {
-      this.domElement.classList.add('telenor');
-    }
+    this.domElement.className = '';
+    this.domElement.classList.add('card');
+    this.domElement.classList.add(data.type);
 
     this.image.src = data.imageData;
     this.content.textContent = data.descriptionText;
@@ -491,10 +500,9 @@
   Ad.prototype.setData = function(data) {
     this.cardData = data;
 
-    this.summaryElement.classList.add('ad');
-    if (data.type === 'telenor') {
-      this.summaryElement.classList.add('telenor');
-    }
+    this.summaryElement.className = '';
+    this.summaryElement.classList.add('card');
+    this.summaryElement.classList.add(data.type);
 
     this.summaryImage.style.backgroundImage = 'url(' + data.imageData + ')';
     this.summaryContent.textContent = data.descriptionText;
