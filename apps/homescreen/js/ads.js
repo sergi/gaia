@@ -25,7 +25,7 @@
     var self = this;
     if (event) {
       this.sendNetworkRequest('POST', this.analyticsUrl, event.detail)
-        .then(self.sendStoredAnalytics(), self.storeAnalytics(event.detail));
+        .then(self.sendStoredAnalytics.bind(self), self.storeAnalytics);
     }
   };
 
@@ -85,12 +85,12 @@
           resolve(req.response);
         }
         else {
-          reject(Error(req.statusText));
+          reject(data);
         }
       };
 
       req.onerror = function() {
-        reject(Error('Network Error'));
+        reject(data);
       };
 
       if (type === 'POST') {
