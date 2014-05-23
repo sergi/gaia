@@ -77,7 +77,7 @@
 
   AdManager.prototype.sendNetworkRequest = function(type, url, data) {
     return new Promise(function(resolve, reject) {
-      var req = new XMLHttpRequest({mozSystem: true});
+      var req = new XMLHttpRequest({mozSystem: true, timeout: 60 * 1000});
       req.open(type, url);
 
       req.onload = function() {
@@ -92,6 +92,10 @@
       req.onerror = function() {
         reject(data);
       };
+
+      req.ontimeout = function() {
+        reject(data);
+      }
 
       if (type === 'POST') {
         req.setRequestHeader('Content-Type', 'application/json');
