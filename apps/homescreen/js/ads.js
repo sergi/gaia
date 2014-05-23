@@ -161,30 +161,34 @@
     this.currentAds = [];
 
     // Make sure the ads are valid in this function.
-    var validAds = [];
-    var currentDate = new Date();
-    for (var i = 0; i < advertisements.length; i++) {
-      // Check if the ad contains an image.
-      if (advertisements[i].image) {
-        var adAvailability = advertisements[i].availability;
-        // Check if the ad has a start and end date.
-        if (adAvailability && adAvailability.start && adAvailability.end) {
-          var startDate = new Date(adAvailability.start);
-          var endDate = new Date(adAvailability.end);
-          // Compare the date of the ad with the current time.
-          if (currentDate > startDate && currentDate < endDate) {
-            validAds.push(advertisements[i]);
+    if (advertisements.length > 0) {
+      var validAds = [];
+      var currentDate = new Date();
+      for (var i = 0; i < advertisements.length; i++) {
+        // Check if the ad contains an image.
+        if (advertisements[i].image) {
+          var adAvailability = advertisements[i].availability;
+          // Check if the ad has a start and end date.
+          if (adAvailability && adAvailability.start && adAvailability.end) {
+            var startDate = new Date(adAvailability.start);
+            var endDate = new Date(adAvailability.end);
+            // Compare the date of the ad with the current time.
+            if (currentDate > startDate && currentDate < endDate) {
+              validAds.push(advertisements[i]);
+            }
           }
         }
       }
-    }
 
-    // the ads now have valid data, try loading the images and rendering them.
-    for (var i = 0; i < validAds.length; i++) {
-      this.fetchImageForAd(validAds[i]).then(function(ad) {
-        self.currentAds.push(ad);
-        self.view.setAds(self.currentAds);
-      });
+      // the ads now have valid data, try loading the images and rendering them.
+      for (var i = 0; i < validAds.length; i++) {
+        this.fetchImageForAd(validAds[i]).then(function(ad) {
+          self.currentAds.push(ad);
+          self.view.setAds(self.currentAds);
+        });
+      }
+    } else {
+      self.view.setAds([]);
     }
   };
 
@@ -257,8 +261,7 @@
     el.classList.add('ad-page');
 
     var startEvent, currentX, currentY, startX, startY, dx, dy,
-        detecting = false, swiping = false, scrolling = false,
-        sponsorBannerVisible, bannerHeight = 134;
+        detecting = false, swiping = false, scrolling = false
 
     el.addEventListener('gridpageshowend', function(e) {
         document.querySelector('#footer').style.transform = 'translateY(100%)';
@@ -305,16 +308,6 @@
         }
       }
       detecting = scrolling = false;
-    });
-
-    this.summaryContainer.addEventListener('scroll', function(e) {
-      if (e.target.scrollTop > bannerHeight && !sponsorBannerVisible) {
-        sponsorBannerVisible = true;
-        document.querySelector('#sponsorBanner').style.opacity = '1.0';
-      } else if (e.target.scrollTop < bannerHeight && sponsorBannerVisible) {
-        sponsorBannerVisible = false;
-        document.querySelector('#sponsorBanner').style.opacity = '0';
-      }
     });
 
     this.createCards();
