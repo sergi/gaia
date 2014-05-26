@@ -357,6 +357,8 @@
     var currentCardData = this.cardsList[this.currentCard].ad.cardData;
     this.detailedCard.setData(currentCardData);
 
+    LazyLoader.load('shared/style/buttons.css');
+
     this.detailsContainer.classList.add('active');
     this.detailsVisible = true;
 
@@ -389,8 +391,9 @@
     this.content.classList.add('content');
     this.cardDetailsContainer = document.createElement('div');
     this.cardDetailsContainer.classList.add('cardDetailsContainer');
-    this.activationButton = document.createElement('div');
+    this.activationButton = document.createElement('button');
     this.activationButton.classList.add('activationButton');
+    this.activationButton.classList.add('recommend');
     this.buttonText = document.createElement('p');
     this.buttonText.classList.add('buttonText');
 

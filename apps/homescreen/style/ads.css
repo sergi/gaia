@@ -63,11 +63,11 @@ body[data-transitioning] #paginationBar {
 }
 
 #summaryContainer > .advertisement {
-  background-color: #f6f6f6;
+  background-color: #fafafb;
 }
 
 #summaryContainer > .offer, .gift {
-  background-color: #e5f4f9;
+  background-color: #effcff;
 }
 
 #summaryContainer > .offer .summaryImage {
@@ -144,8 +144,8 @@ body[data-transitioning] #paginationBar {
 }
 
 #detailsContainer .card .activationButton .buttonText {
-  color: #fff;
   font-size: 20px;
+  margin: 0;
 }
 
 #detailsContainer .card .closeButton {
@@ -182,7 +182,7 @@ body[data-transitioning] #paginationBar {
 }
 
 #detailsContainer .offer {
-  border-color: #0493c8;
+  border-color: #00caf2;
   border-width: 4px;
 }
 
