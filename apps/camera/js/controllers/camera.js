@@ -65,6 +65,7 @@ CameraController.prototype.bindEvents = function() {
   app.on('settings:configured', this.onSettingsConfigured);
   app.on('change:batteryStatus', this.onBatteryStatusChange);
   app.on('previewgallery:opened', this.onPreviewGalleryOpened);
+  app.on('attentionscreenopened', this.camera.stopRecording);
 
   // Settings
   settings.recorderProfiles.on('change:selected', this.onRecorderProfileChange);
@@ -123,10 +124,40 @@ CameraController.prototype.onSettingsConfigured = function() {
     .setPictureSize(pictureSize)
     .configure();
 
+  // Bug 983930 - [B2G][Camera] CameraControl API's "zoom" attribute doesn't
+  // scale preview properly
+  //
+  // For some reason, the above calculation for `maxHardwareZoom` does not
+  // work properly on Nexus 4 devices.
+  var hardware = navigator.mozSettings.createLock().get('deviceinfo.hardware');
+  var self = this;
+  hardware.onsuccess = function(evt) {
+    var device = evt.target.result['deviceinfo.hardware'];
+    if (device === 'mako') {
+
+      // Nexus 4 needs zoom preview adjustment since the viewfinder preview
+      // stream does not automatically reflect the current zoom value.
+      settings.zoom.set('useZoomPreviewAdjustment', true);
+
+      if (self.camera.selectedCamera === 'front') {
+        self.camera.set('maxHardwareZoom', 1);
+      } else {
+        self.camera.set('maxHardwareZoom', 1.25);
+      }
+
+      self.camera.emit('zoomconfigured');
+    }
+  };
+
   debug('camera configured with final settings');
 
   // TODO: Move to a new StorageController (or App?)
-  var maxFileSize = (pictureSize.width * pictureSize.height * 4) + 4096;
+  //
+  // It is very unlikely that a JPEG file will have a file size that is
+  // more than half a byte per pixel. There is some fixed EXIF overhead
+  // that is the same for small and large pictures, however, so we add
+  // an additional 25,000 bytes of padding.
+  var maxFileSize = (pictureSize.width * pictureSize.height / 2) + 25000;
   this.storage.setMaxFileSize(maxFileSize);
 };
 

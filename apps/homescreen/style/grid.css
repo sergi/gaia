@@ -51,17 +51,6 @@ body.searchPageEnabled .apps div:first-child ol > li:nth-child(13) {
   display: none;
 }
 
-/* Option to delete apps */
-.apps ol > li span.options {
-  position: absolute;
-  top: .1rem;
-  left: .5rem;
-  width: calc(100% - .5rem);
-  height: 2.6rem;
-  z-index: 15; /* So the Delete button will be above the collections' circle */
-  background: url(../resources/images/delete.png) no-repeat left top / 2.4rem;
-}
-
 /* Container -> icon + label */
 .apps ol > li > div {
   position: relative;
@@ -130,21 +119,22 @@ ol > li.active > div > img {
 
 /* Alternative icons when an app is being installed */
 .loading:after {
-  margin: 0.8rem;
   content: "";
   position: absolute;
   left: 0;
-  top: 0;
+  top: 0.6rem;
   z-index: 30000;
-  width: 6rem;
-  height: 6rem;
+  width: 100%;
+  height: 6.2rem;
   background: url('/style/images/loading_spinner.png');
-  background-size: 6rem;
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: 6.2rem;
   animation: rotate 2.25s linear infinite;
 }
 
 .apps .loading:after {
-  margin-top: 0.4rem;
+  top: 0.1rem;
 }
 
 /* the panels are panning */
@@ -156,13 +146,6 @@ body[data-transitioning] .loading:after {
 .draggable .loading:after {
   animation-name: none;
   background: none;
-}
-
-.loading img {
-  margin-top: 0.4rem;
-  margin-left: -0.4rem;
-  width: 6rem;
-  height: 6rem;
 }
 
 @keyframes rotate {
@@ -230,11 +213,6 @@ body[data-transitioning] .loading:after {
 @media (min-width: 768px) {
   .apps > div {
     height: calc(100% - 16.9rem);
-  }
-
-  .apps ol > li span.options {
-    height: 4.5rem;
-    background: url(../resources/images/delete.png) no-repeat left top / 4.5rem;
   }
 
   .apps ol {
