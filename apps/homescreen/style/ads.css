@@ -14,15 +14,23 @@ body[data-transitioning] #paginationBar {
 }
 
 #sponsorBanner {
-  background-image: url(images/wiggle-banner-300x250.jpg);
+  display: none;
   height: 80px;
+}
+
+.sponsored #sponsorBanner {
+  display: block;
 }
 
 #summaryContainer {
   background-color: #fff;
-  height: calc(100% - 80px);
+  height: 100%;
   overflow-y: scroll;
   width: 100%;
+}
+
+.sponsored #summaryContainer {
+  height: calc(100% - 80px);
 }
 
 #summaryContainer > .intro {
