@@ -114,7 +114,7 @@
     });
   };
 
-  AdManager.prototype.fetchImageForAd = function(ad) {
+  AdManager.prototype.fetchImage = function(ad) {
     /* Flow:
      * 1. Check if the image is on the device.
      * 2a. if success: return the old one.
@@ -145,10 +145,58 @@
     });
   }
 
-  AdManager.prototype.manageAds = function(ads) {
+  AdManager.prototype.manageAds = function(apiData) {
     var self = this;
-    var advertisements = ads.advertisements;
 
+    //Handle sponsors
+    var sponsors = apiData.sponsors;
+    if (this.currentSponsor) {
+      var lookup = {};
+      for (var i = 0, len = sponsors.length; i < len; i++) {
+        lookup[sponsors[i].id] = sponsors[i];
+      }
+      if (!lookup[this.currentSponsor.id]) {
+        this.removeDBItem(this.currentSponsor.id);
+      }
+    }
+
+    // Reset the current sponsor.
+    this.currentSponsor = [];
+
+    // Make sure the ads are valid in this function.
+    if (sponsors.length > 0) {
+      var validSponsors = [];
+      var currentDate = new Date();
+      for (var i = 0; i < sponsors.length; i++) {
+        // Check if the sponsor contains an image.
+        if (sponsors[i].image) {
+          var sponsorAvailability = sponsors[i].availability;
+          // Check if the ad has a start and end date.
+          if (sponsorAvailability && sponsorAvailability.start && sponsorAvailability.end) {
+            var startDate = new Date(sponsorAvailability.start);
+            var endDate = new Date(sponsorAvailability.end);
+            // Compare the date of the ad with the current time.
+            if (currentDate > startDate && currentDate < endDate) {
+              this.validSponsors.push(sponsors[i]);
+            }
+          }
+        }
+      }
+
+      // the ads now have valid data, try loading the images and rendering them.
+      for (var i = 0; i < validSponsors.length; i++) {
+        this.fetchImage(validSponsors[i]).then(function(sponsor) {
+          self.currentSponsor = ad;
+          self.view.setSponsor(self.currentSponsor);
+        });
+      }
+    } else {
+      self.view.removeSponsor();
+    }
+
+
+    //Handle advertisements
+    var advertisements = apiData.advertisements;
     if (this.currentAds && this.currentAds.length > 0) {
       var lookup = {};
       for (var i = 0, len = advertisements.length; i < len; i++) {
@@ -156,7 +204,7 @@
       }
       for (var i = 0; i < this.currentAds.length; i++) {
         if (!lookup[this.currentAds[i].id]) {
-          this.removeAd(this.currentAds[i].id);
+          this.removeDBItem(this.currentAds[i].id);
         }
       }
     }
@@ -186,7 +234,7 @@
 
       // the ads now have valid data, try loading the images and rendering them.
       for (var i = 0; i < validAds.length; i++) {
-        this.fetchImageForAd(validAds[i]).then(function(ad) {
+        this.fetchImage(validAds[i]).then(function(ad) {
           self.currentAds.push(ad);
           self.view.setAds(self.currentAds);
         });
@@ -216,7 +264,7 @@
     window.setInterval(this.fetchAds.bind(this), 6 * 60 * 60 * 1000);
   };
 
-  AdManager.prototype.removeAd = function(adId) {
+  AdManager.prototype.removeDBItem = function(adId) {
     // Remove the images from an old ad from the DB.
     var lookup = {};
     for (var i = 0, len = this.currentAds.length; i < len; i++) {
@@ -261,27 +309,27 @@
     page.ignoreOnSave = true;
 
     // And grab the element so we can do stuff with it
-    var el = this.gridManager.container.firstChild;
-    el.classList.add('ad-page');
+    this.domElement = this.gridManager.container.firstChild;
+    this.domElement.classList.add('ad-page');
 
     var startEvent, currentX, currentY, startX, startY, dx, dy,
         detecting = false, swiping = false, scrolling = false
 
-    el.addEventListener('gridpageshowend', function(e) {
+    this.domElement.addEventListener('gridpageshowend', function(e) {
         document.querySelector('#footer').style.transform = 'translateY(100%)';
     });
-    el.addEventListener('gridpagehideend', function(e) {
+    this.domElement.addEventListener('gridpagehideend', function(e) {
         document.querySelector('#footer').style.transform = '';
     });
 
-    el.addEventListener('touchstart', function(e) {
+    this.domElement.addEventListener('touchstart', function(e) {
       startEvent = e;
       swiping = false;
       detecting = true;
       startX = startEvent.touches[0].pageX;
       startY = startEvent.touches[0].pageY;
     });
-    el.addEventListener('touchmove', function(e) {
+    this.domElement.addEventListener('touchmove', function(e) {
       if (self.detailsVisible) {
         e.preventDefault();
       }
@@ -302,7 +350,7 @@
         }
       }
     });
-    el.addEventListener('touchend', function(e) {
+    this.domElement.addEventListener('touchend', function(e) {
       if (swiping === false && scrolling === false) {
         if (self.detailsVisible === false) {
           var card = e.target.dataset.cardIndex;
@@ -316,11 +364,11 @@
 
     this.createCards();
 
-    el.appendChild(this.sponsorBanner);
-    el.appendChild(this.summaryContainer);
-    el.appendChild(this.detailsContainer);
+    this.domElement.appendChild(this.sponsorBanner);
+    this.domElement.appendChild(this.summaryContainer);
+    this.domElement.appendChild(this.detailsContainer);
 
-    return el;
+    return this.domElement;
   };
 
   AdView.prototype.createCards = function() {
@@ -351,6 +399,15 @@
       this.cardsList[i].ad.setData(ads[i]);
     }
   };
+
+  AdView.prototype.setSponsor = function(sponsor) {
+    this.domElement.classList.add('sponsored');
+    this.operatroCard.setSponsor(sponsor);
+  }
+
+  AdView.prototype.removeSponsor = function() {
+    this.domElement.classList.remove('sponsored');
+  }
 
   AdView.prototype.openDetails = function(card) {
     this.currentCard = card-0;
@@ -438,7 +495,7 @@
     document.dispatchEvent(event);
   };
 
-  DetailedCard.prototype.setData = function (data) {
+  DetailedCard.prototype.setData = function(data) {
     this.cardData = data;
 
     this.domElement.className = '';
@@ -451,7 +508,8 @@
     this.action = data.action;
   }
 
-  var OperatorCard = function () {
+  var OperatorCard = function() {
+    var self = this;
     this.domElement = document.createElement('div');
     this.domElement.classList.add('intro');
     this.welcomeText = document.createElement('p');
@@ -460,7 +518,6 @@
     this.sponsorBanner.classList.add('sponsorBanner');
 
     if (navigator.mozSettings) {
-      var self = this;
       var hasRefreshLock = navigator.mozSettings.createLock();
       var hasRefresh = hasRefreshLock.get('adsRefreshButton.enabled');
         hasRefresh.onsuccess = (function() {
@@ -476,9 +533,20 @@
         }
       });
     }
-    
+
+    this.sponsorBanner.addEventListener('touchend', function() {
+      if (this.sponsorUrl) {
+        new MozActivity({name: 'view', data: {type: 'url', url: self.sponsorUrl}});
+      }
+    })
+
     this.domElement.appendChild(this.welcomeText);
     this.domElement.appendChild(this.sponsorBanner);
+  }
+
+  OperatorCard.prototype.setSponsor = function(sponsor) {
+    this.sponsorBanner.style.backgroundImage = 'url(' + sponsor.imageData + ')';
+    this.sponsorUrl = sponsor.url;
   }
 
   function Ad(cardIndex) {
