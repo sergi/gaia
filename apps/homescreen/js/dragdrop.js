@@ -155,7 +155,8 @@ var DragDropManager = (function() {
           done();
         });
       } else if (
-          (pageHelper.getCurrentPageNumber() > 0) && dirCtrl.limitPrev(cx)) {
+          (pageHelper.getCurrentPageNumber() > pageHelper.getGlobalOffset())
+          && dirCtrl.limitPrev(cx)) {
         isDisabledDrop = true;
         DragLeaveEventManager.send(curPageObj, function end(done) {
           pageHelper.getPrevious().appendIconVisible(draggableIcon);

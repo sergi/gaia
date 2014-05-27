@@ -784,6 +784,10 @@ var GridManager = (function() {
       return pages[index];
     },
 
+    getGlobalOffset: function() {
+      return globalOffset;
+    },
+
     /*
      * Returns the total number of pages
      */
