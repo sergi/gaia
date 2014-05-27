@@ -177,7 +177,7 @@
             var endDate = new Date(sponsorAvailability.end);
             // Compare the date of the ad with the current time.
             if (currentDate > startDate && currentDate < endDate) {
-              this.validSponsors.push(sponsors[i]);
+              validSponsors.push(sponsors[i]);
             }
           }
         }
@@ -186,7 +186,7 @@
       // the ads now have valid data, try loading the images and rendering them.
       for (var i = 0; i < validSponsors.length; i++) {
         this.fetchImage(validSponsors[i]).then(function(sponsor) {
-          self.currentSponsor = ad;
+          self.currentSponsor = sponsor;
           self.view.setSponsor(self.currentSponsor);
         });
       }
@@ -270,6 +270,7 @@
     for (var i = 0, len = this.currentAds.length; i < len; i++) {
       lookup[this.currentAds[i].id] = this.currentAds[i];
     }
+    lookup[this.currentSponsor.id] = this.currentSponsor;
 
     if (lookup[adId].image) {
       asyncStorage.getItem(lookup[adId].image, function(image) {
@@ -287,6 +288,12 @@
     this.sponsorBanner.id = 'sponsorBanner';
     this.detailsContainer = document.createElement('div');
     this.detailsContainer.id = 'detailsContainer';
+
+    this.sponsorBanner.addEventListener('touchend', function() {
+      if (this.sponsorUrl) {
+        new MozActivity({name: 'view', data: {type: 'url', url: self.sponsorUrl}});
+      }
+    })
 
     this.cardsList = [];
     this.dataStore = null;
@@ -402,7 +409,8 @@
 
   AdView.prototype.setSponsor = function(sponsor) {
     this.domElement.classList.add('sponsored');
-    this.operatroCard.setSponsor(sponsor);
+    this.sponsorBanner.style.backgroundImage = 'url(' + sponsor.imageData + ')';
+    this.sponsorUrl = sponsor.url;
   }
 
   AdView.prototype.removeSponsor = function() {
@@ -514,8 +522,6 @@
     this.domElement.classList.add('intro');
     this.welcomeText = document.createElement('p');
     this.welcomeText.textContent = 'Welcome to Specials ';
-    this.sponsorBanner = document.createElement('div');
-    this.sponsorBanner.classList.add('sponsorBanner');
 
     if (navigator.mozSettings) {
       var hasRefreshLock = navigator.mozSettings.createLock();
@@ -534,19 +540,8 @@
       });
     }
 
-    this.sponsorBanner.addEventListener('touchend', function() {
-      if (this.sponsorUrl) {
-        new MozActivity({name: 'view', data: {type: 'url', url: self.sponsorUrl}});
-      }
-    })
 
     this.domElement.appendChild(this.welcomeText);
-    this.domElement.appendChild(this.sponsorBanner);
-  }
-
-  OperatorCard.prototype.setSponsor = function(sponsor) {
-    this.sponsorBanner.style.backgroundImage = 'url(' + sponsor.imageData + ')';
-    this.sponsorUrl = sponsor.url;
   }
 
   function Ad(cardIndex) {
