@@ -302,6 +302,7 @@
     this.gridManager = gridManager;
 
     document.addEventListener('close-details', this.closeDetails.bind(this));
+    window.setInterval(this.flipCards, 2000);
   };
 
   AdView.prototype.createAdPage = function() {
@@ -383,6 +384,13 @@
     this.summaryContainer.appendChild(this.operatorCard.domElement);
     this.detailedCard = new DetailedCard();
     this.detailsContainer.appendChild(this.detailedCard.domElement);
+  };
+
+  AdView.prototype.flipCards = function() {
+    var flippableOffers = document.querySelectorAll('#summaryContainer .offer .summaryImage');
+    for(var i = 0; i < flippableOffers.length; i++) {
+      flippableOffers[i].classList.toggle('flipped');
+    };
   };
 
   AdView.prototype.setAds = function(adsData) {
@@ -520,8 +528,6 @@
     var self = this;
     this.domElement = document.createElement('div');
     this.domElement.classList.add('intro');
-    this.welcomeText = document.createElement('p');
-    this.welcomeText.textContent = 'Welcome to Specials ';
 
     if (navigator.mozSettings) {
       var hasRefreshLock = navigator.mozSettings.createLock();
@@ -539,9 +545,6 @@
         }
       });
     }
-
-
-    this.domElement.appendChild(this.welcomeText);
   }
 
   function Ad(cardIndex) {
@@ -567,7 +570,26 @@
     this.summaryElement.classList.add('card');
     this.summaryElement.classList.add(data.type);
 
-    this.summaryImage.style.backgroundImage = 'url(' + data.imageData + ')';
+    while (this.summaryImage.firstChild) {
+      this.summaryImage.removeChild(this.summaryImage.firstChild);
+    }
+
+    if (data.type === 'offer') {
+      var firstImage = document.createElement('div');
+      firstImage.classList.add('firstImage');
+      var secondImage = document.createElement('div');
+      secondImage.classList.add('secondImage');
+
+      firstImage.style.backgroundImage = 'url(' + data.imageData + ')';
+      secondImage.style.backgroundImage = 'url(' + data.imageData + ')';
+
+      this.summaryImage.style.backgroundImage = '';
+      this.summaryImage.appendChild(firstImage);
+      this.summaryImage.appendChild(secondImage);
+    } else {
+      this.summaryImage.style.backgroundImage = 'url(' + data.imageData + ')';
+    }
+
     this.summaryContent.textContent = data.descriptionText;
   };
 
