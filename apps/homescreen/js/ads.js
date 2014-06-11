@@ -9,7 +9,7 @@
 
     this.apiPrefix = 'http://fxosad.telenordigital.com'
     this.adsUrl = this.apiPrefix + '/api/client/data';
-    this.analyticsUrl = this.apiPrefix + '/api/analytics';
+    this.analyticsUrl = this.apiPrefix + '/api/client/events';
 
     document.addEventListener('ad-analytics', this.sendAnalytics.bind(this));
     document.addEventListener('fetch-ads', this.fetchAds.bind(this));
