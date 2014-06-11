@@ -117,15 +117,25 @@ body[data-transitioning] #paginationBar {
   width: 125px;
 }
 
-#summaryContainer .summaryContent {
+#summaryContainer .summaryInfo {
+  display: flex;
+  flex-wrap: wrap;
+  height: 100%;
   width: 130px;
+}
+
+#summaryContainer .summaryInfo .summaryProvider {
+  align-self: flex-end;
+  font-size: 10px;
+  font-weight: bold;
+  margin-bottom: 1rem;
 }
 
 #summaryContainer > .card:nth-of-type(odd) .summaryImage {
   float: right;
 }
 
-#summaryContainer > .card:nth-of-type(odd) .summaryContent {
+#summaryContainer > .card:nth-of-type(odd) .summaryInfo {
   float: right;
 }
 
@@ -133,7 +143,7 @@ body[data-transitioning] #paginationBar {
   float: left;
 }
 
-#summaryContainer > .card:nth-of-type(even) .summaryContent {
+#summaryContainer > .card:nth-of-type(even) .summaryInfo {
   float: left;
 }
 
@@ -213,8 +223,16 @@ body[data-transitioning] #paginationBar {
   width: 300px;
 }
 
+#detailsContainer .cardDetails {
+  font-weight: bold;
+  margin: 0;
+  margin-right: 10px;
+  text-align: right;
+}
+
 #detailsContainer .card .content {
   font-size: 18px;
+  margin: 10px 0;
 }
 
 #detailsContainer .offer {

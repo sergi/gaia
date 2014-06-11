@@ -462,8 +462,8 @@
     this.image.classList.add('detailsImage');
     this.content = document.createElement('p');
     this.content.classList.add('content');
-    this.cardDetailsContainer = document.createElement('div');
-    this.cardDetailsContainer.classList.add('cardDetailsContainer');
+    this.cardDetails = document.createElement('p');
+    this.cardDetails.classList.add('cardDetails');
     this.activationButton = document.createElement('button');
     this.activationButton.classList.add('activationButton');
     this.activationButton.classList.add('recommend');
@@ -483,7 +483,7 @@
 
     this.domElement.appendChild(this.closeButton);
     this.domElement.appendChild(this.image);
-    this.domElement.appendChild(this.cardDetailsContainer);
+    this.domElement.appendChild(this.cardDetails);
     this.domElement.appendChild(this.content);
     this.domElement.appendChild(this.activationButton);
   };
@@ -522,6 +522,7 @@
     this.content.textContent = data.descriptionText;
     this.buttonText.textContent = data.buttonText;
     this.action = data.action;
+    this.cardDetails.textContent = data.provider;
   }
 
   var OperatorCard = function() {
@@ -556,11 +557,17 @@
 
     this.summaryImage = document.createElement('div');
     this.summaryImage.classList.add('summaryImage');
+    var summaryInfo = document.createElement('div');
+    summaryInfo.classList.add('summaryInfo');
     this.summaryContent = document.createElement('p');
     this.summaryContent.classList.add('summaryContent');
+    this.summaryProvider = document.createElement('p');
+    this.summaryProvider.classList.add('summaryProvider');
 
     this.summaryElement.appendChild(this.summaryImage);
-    this.summaryElement.appendChild(this.summaryContent);
+    summaryInfo.appendChild(this.summaryContent);
+    summaryInfo.appendChild(this.summaryProvider);
+    this.summaryElement.appendChild(summaryInfo);
   }
 
   Ad.prototype.setData = function(data) {
@@ -591,6 +598,7 @@
     }
 
     this.summaryContent.textContent = data.descriptionText;
+    this.summaryProvider.textContent = data.provider;
   };
 
   var AdUtils = exports.AdUtils = function (){};
