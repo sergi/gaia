@@ -10,9 +10,11 @@
     this.apiPrefix = 'http://fxosad.telenordigital.com'
     this.adsUrl = this.apiPrefix + '/api/client/data';
     this.analyticsUrl = this.apiPrefix + '/api/client/events';
+    this.pointsUrl = this.apiPrefix + '/api/client/points';
 
     document.addEventListener('ad-analytics', this.sendAnalytics.bind(this));
     document.addEventListener('fetch-ads', this.fetchAds.bind(this));
+    document.addEventListener('fetch-points', this.fetchPoints.bind(this));
     document.addEventListener('online', this.fetchAds.bind(this));
   };
 
@@ -111,6 +113,14 @@
     this.sendNetworkRequest('GET', this.adsUrl).then(function (response) {
       asyncStorage.setItem('Telenor-ads', JSON.parse(response));
       self.manageAds(JSON.parse(response));
+    });
+  };
+
+  AdManager.prototype.fetchPoints = function() {
+    var self = this;
+    this.sendNetworkRequest('GET', this.pointsUrl).then(function (response) {
+      asyncStorage.setItem('Telenor-points', JSON.parse(response));
+      self.managePoints(JSON.parse(response));
     });
   };
 
@@ -244,7 +254,11 @@
     }
   };
 
-  AdManager.prototype.setupAds = function() {
+  AdManager.prototype.managePoints = function(apiData) {
+    this.view.setPoints(apiData);
+  }
+
+  AdManager.prototype.setupSystem = function() {
     var self = this;
     // Load all ads from the database on phone boot, if there are none, load the json file.
     asyncStorage.getItem('Telenor-ads', function(ads) {
@@ -258,10 +272,21 @@
           function() {console.log('Error loading preloaded ads')});
       }
     });
+
+    asyncStorage.getItem('Telenor-points', function(points) {
+      if (points) {
+        self.managePoints(points)
+      }
+    });
+
     // Try fetching ads 10 seconds after device boot.
     window.setTimeout(this.fetchAds.bind(this), 10000);
     // Try fetching ads every 6 hours.
     window.setInterval(this.fetchAds.bind(this), 6 * 60 * 60 * 1000);
+    // Try fetching points 5 seconds after device boot.
+    window.setTimeout(this.fetchPoints.bind(this), 5000);
+    // Try fetching ads every 8 hours.
+    window.setInterval(this.fetchPoints.bind(this), 8 * 60 * 60 * 1000);
   };
 
   AdManager.prototype.removeDBItem = function(adId) {
@@ -415,6 +440,10 @@
     }
   };
 
+  AdView.prototype.setPoints = function(pointsData) {
+    this.operatorCard.setPoints(pointsData.points);
+  }
+
   AdView.prototype.setSponsor = function(sponsor) {
     this.domElement.classList.add('sponsored');
     this.sponsorBanner.style.backgroundImage = 'url(' + sponsor.imageData + ')';
@@ -530,6 +559,9 @@
     this.domElement = document.createElement('div');
     this.domElement.classList.add('intro');
 
+    this.pointsElement = document.createElement('p');
+    this.pointsElement.classList.add('points');
+
     if (navigator.mozSettings) {
       var hasRefreshLock = navigator.mozSettings.createLock();
       var hasRefresh = hasRefreshLock.get('adsRefreshButton.enabled');
@@ -539,6 +571,8 @@
             self.fetchIcon.classList.add('fetchIcon');
             self.fetchIcon.textContent = '↻';
             self.fetchIcon.addEventListener('touchend', function() {
+              var event = new Event('fetch-points');
+              document.dispatchEvent(event);
               var event = new Event('fetch-ads');
               document.dispatchEvent(event);
             });
@@ -546,6 +580,11 @@
         }
       });
     }
+    this.domElement.appendChild(this.pointsElement);
+  }
+
+  OperatorCard.prototype.setPoints = function(points) {
+    this.pointsElement.textContent = points;
   }
 
   function Ad(cardIndex) {
@@ -631,7 +670,7 @@
       var adView = new AdView(window.GridManager);
       adView.createAdPage();
       var adManager = new AdManager(adView);
-      adManager.setupAds();
+      adManager.setupSystem();
 
       GridManager.goToLandingPage = function() {
         document.body.dataset.transitioning = 'true';
