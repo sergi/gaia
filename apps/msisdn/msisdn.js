@@ -128,17 +128,33 @@ var getToken = (function getTokenImpl(window) {
 
   function _request(url, callback) {
     var req = new XMLHttpRequest({mozSystem: true});
+
     req.onload = function() {
       if (this.status >= 400) {
         return callback(this.status);
       }
 
-      callback(null, this.responseText);
+      callback(null, this.response);
     };
+
     req.onerror = function() {
       callback('Connection Timeout');
     };
+
     req.open('GET', url, true);
+
+    req.responseType = 'json';
+
+    // TODO(olav): Put this behind build flag for when there is no header injection
+    if (true) {
+      var msisdn = localStorage.getItem('tmp_hack');
+      if (!msisdn) {
+        msisdn = Math.floor(Math.random() * 100000000).toString();
+        localStorage.setItem('tmp_hack', msisdn);
+      }
+      req.setRequestHeader('msisdn', msisdn);
+    }
+
     req.send();
   }
 
