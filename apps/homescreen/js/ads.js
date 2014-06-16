@@ -499,15 +499,36 @@
     this.buttonText = document.createElement('p');
     this.buttonText.classList.add('buttonText');
 
-    this.closeButton.addEventListener('touchend', function(e) {
-      var event = new Event('close-details');
-      document.dispatchEvent(event);
-    });
-
     this.activationButton.appendChild(this.buttonText);
     this.activationButton.addEventListener('touchend', function(e) {
       e.stopPropagation();
       self.activate();
+    });
+
+    this.redeemContainer = document.createElement('div');
+    this.redeemContainer.classList.add('redeemContainer');
+    var redeemButtonsContainer = document.createElement('menu');
+    redeemButtonsContainer.classList.add('redeemButtonsContainer');
+    this.cancelRedeemButton = document.createElement('button');
+    this.cancelRedeemButton.textContent = 'Cancel';
+    this.acceptRedeemButton = document.createElement('button');
+    this.acceptRedeemButton.classList.add('recommend');
+    this.acceptRedeemButton.textContent = 'Confirm';
+
+    redeemButtonsContainer.appendChild(this.cancelRedeemButton);
+    redeemButtonsContainer.appendChild(this.acceptRedeemButton);
+    this.redeemContainer.appendChild(redeemButtonsContainer);
+
+    this.cancelRedeemButton.addEventListener('touchend', function(e) {
+      self.redeemContainer.style.visibility = 'hidden';
+    });
+    this.acceptRedeemButton.addEventListener('touchend', function(e) {
+      self.redeem();
+    });
+
+    this.closeButton.addEventListener('touchend', function(e) {
+      var event = new Event('close-details');
+      document.dispatchEvent(event);
     });
 
     this.domElement.appendChild(this.closeButton);
@@ -515,30 +536,46 @@
     this.domElement.appendChild(this.cardDetails);
     this.domElement.appendChild(this.content);
     this.domElement.appendChild(this.activationButton);
+    this.domElement.appendChild(this.redeemContainer);
   };
 
   DetailedCard.prototype.activate = function() {
     var data = this.cardData;
-    switch(data.action.type) {
-      case 'url':
-        new MozActivity({name: 'view', data: {type: 'url', url: data.action.url}});
-        break;
-      case 'call':
-        new MozActivity({name: 'dial', data: {type: 'webtelephony/number',
-            number: data.action.phoneNumber}});
-        break;
-      case 'sms':
-        new MozActivity({name: 'new', data: {type: 'websms/sms',
-            number: data.action.phoneNumber, body: data.action.smsMessage}});
-        break;
+    if (data.type !== 'offer') {
+      switch(data.action.type) {
+        case 'url':
+          new MozActivity({name: 'view', data: {type: 'url', url: data.action.url}});
+          break;
+        case 'call':
+          new MozActivity({name: 'dial', data: {type: 'webtelephony/number',
+              number: data.action.phoneNumber}});
+          break;
+        case 'sms':
+          new MozActivity({name: 'new', data: {type: 'websms/sms',
+              number: data.action.phoneNumber, body: data.action.smsMessage}});
+          break;
+      }
+      this.sendClickAnalytics();
+    } else {
+      this.redeemContainer.style.visibility = 'visible';
     }
+  };
+
+  DetailedCard.prototype.redeem = function() {
+    this.sendClickAnalytics();
+    this.redeemContainer.style.visibility = 'hidden';
+    //TODO Hook up actual redeeming code.
+  }
+
+  DetailedCard.prototype.sendClickAnalytics = function() {
+    var data = this.cardData;
     var eventData = [];
     var card = {};
     card.id = data.id
     eventData.push({'card': card, 'timestamp': new Date().toISOString(), type: 'click'});
     var event = new CustomEvent('ad-analytics', {'detail': eventData});
     document.dispatchEvent(event);
-  };
+  }
 
   DetailedCard.prototype.setData = function(data) {
     this.cardData = data;
@@ -557,6 +594,7 @@
       this.activationButton.style.visibility = 'hidden';
     }
     this.cardDetails.textContent = data.provider;
+    this.redeemContainer.style.visibility = 'hidden';
   }
 
   var OperatorCard = function() {

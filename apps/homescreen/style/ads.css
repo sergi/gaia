@@ -177,7 +177,7 @@ body[data-transitioning] #paginationBar {
   position: relative;
 }
 
-#detailsContainer .card .activationButton {
+#detailsContainer .card .activationButton, .redeemContainer .redeemButtonsContainer {
   align-items: center;
   background-color: #0493c8;
   bottom: 0;
@@ -185,6 +185,7 @@ body[data-transitioning] #paginationBar {
   height: 40px;
   justify-content: center;
   margin: 2%;
+  padding: 0;
   position: absolute;
   width: 96%;
 }
@@ -221,6 +222,22 @@ body[data-transitioning] #paginationBar {
   background-size: 100%;
   height: 250px;
   width: 300px;
+}
+
+#detailsContainer .card .redeemContainer {
+  background-color: rgba(255,255,255,0.75);
+  height: 100%;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+#detailsContainer .card .redeemContainer .redeemButtonsContainer {
+  background-color: #fff;
+}
+
+#detailsContainer .card .redeemContainer .redeemButtonsContainer button{
+  margin: 0 0.5rem;
 }
 
 #detailsContainer .cardDetails {
