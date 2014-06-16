@@ -551,6 +551,11 @@
     this.content.textContent = data.descriptionText;
     this.buttonText.textContent = data.buttonText;
     this.action = data.action;
+    if (this.action) {
+      this.activationButton.style.visibility = 'visible';
+    } else {
+      this.activationButton.style.visibility = 'hidden';
+    }
     this.cardDetails.textContent = data.provider;
   }
 
