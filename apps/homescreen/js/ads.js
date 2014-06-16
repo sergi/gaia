@@ -258,6 +258,18 @@
     this.view.setPoints(apiData);
   }
 
+  AdManager.prototype.manageToken = function(token) {
+    this.authToken = token;
+
+    this.fetchAds();
+    this.fetchPoints();
+
+    // Try fetching ads every 6 hours.
+    window.setInterval(this.fetchAds.bind(this), 6 * 60 * 60 * 1000);
+    // Try fetching ads every 8 hours.
+    window.setInterval(this.fetchPoints.bind(this), 8 * 60 * 60 * 1000);
+  }
+
   AdManager.prototype.setupSystem = function() {
     var self = this;
     // Load all ads from the database on phone boot, if there are none, load the json file.
@@ -278,15 +290,6 @@
         self.managePoints(points)
       }
     });
-
-    // Try fetching ads 10 seconds after device boot.
-    window.setTimeout(this.fetchAds.bind(this), 10000);
-    // Try fetching ads every 6 hours.
-    window.setInterval(this.fetchAds.bind(this), 6 * 60 * 60 * 1000);
-    // Try fetching points 5 seconds after device boot.
-    window.setTimeout(this.fetchPoints.bind(this), 5000);
-    // Try fetching ads every 8 hours.
-    window.setInterval(this.fetchPoints.bind(this), 8 * 60 * 60 * 1000);
   };
 
   AdManager.prototype.removeDBItem = function(adId) {
@@ -707,13 +710,26 @@
     }
   };
 
-  AdUtils.initializeSystem = function() {
+  AdUtils.initializeSystem = function(telenorSims) {
     if (!AdUtils.initialized) {
       AdUtils.initialized = true;
+
       var adView = new AdView(window.GridManager);
       adView.createAdPage();
       var adManager = new AdManager(adView);
       adManager.setupSystem();
+
+      setTimeout(function() {
+        var tokenSettings = {
+          sims: telenorSims,
+          url: 'https://fxosad.telenordigital.com/api/client/auth/identify'
+        }
+        getAdToken(tokenSettings, function(err, token) {
+          if (token) {
+            adManager.manageToken(token);
+          }
+        });
+      });
 
       GridManager.goToLandingPage = function() {
         document.body.dataset.transitioning = 'true';
@@ -724,15 +740,17 @@
   }
 
   document.addEventListener('homescreen-ready', function(e) {
-    if (AdUtils.findTelenorSims()) {
-      AdUtils.initializeSystem();
+    var telenorSims = AdUtils.findTelenorSims();
+    if (telenorSims) {
+      AdUtils.initializeSystem(telenorSims);
     } else {
       var ICCs = navigator.mozIccManager.iccIds;
       for (var i = 0; i < ICCs.length; i++) {
         navigator.mozIccManager.getIccById(ICCs[i]).oniccinfochange = function(icc) {
           if (icc.target.cardState === 'ready') {
-            if (AdUtils.findTelenorSims()) {
-              AdUtils.initializeSystem();
+            telenorSims = AdUtils.findTelenorSims();
+            if (telenorSims) {
+              AdUtils.initializeSystem(telenorSims);
             } else {
               navigator.mozIccManager.getIccById(icc.target.iccInfo.iccid)
                 .oniccinfochange = null;
