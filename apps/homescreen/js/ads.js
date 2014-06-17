@@ -7,7 +7,7 @@
     this.currentAds = [];
     this.view = adView;
 
-    this.apiPrefix = 'http://fxosad.telenordigital.com'
+    this.apiPrefix = 'https://fxosad.telenordigital.com'
     this.adsUrl = this.apiPrefix + '/api/client/data';
     this.analyticsUrl = this.apiPrefix + '/api/client/events';
     this.pointsUrl = this.apiPrefix + '/api/client/points';
@@ -78,9 +78,13 @@
   }
 
   AdManager.prototype.sendNetworkRequest = function(type, url, data) {
+    var self = this;
     return new Promise(function(resolve, reject) {
       var req = new XMLHttpRequest({mozSystem: true, timeout: 60 * 1000});
       req.open(type, url);
+      if (self.authToken) {
+        req.setRequestHeader('Authentication', self.authToken);
+      }
 
       req.onload = function() {
         if (req.status == 200) {
