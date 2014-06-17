@@ -109,6 +109,11 @@
   }
 
   AdManager.prototype.fetchAds = function() {
+    if (!this.authToken) {
+      // Not authenticated yet.
+      return;
+    }
+
     var self = this;
     this.sendNetworkRequest('GET', this.adsUrl).then(function (response) {
       asyncStorage.setItem('Telenor-ads', JSON.parse(response));
@@ -720,6 +725,7 @@
       adManager.setupSystem();
 
       setTimeout(function() {
+        console.log('Going to fetch ad token');
         var tokenSettings = {
           sims: telenorSims,
           url: 'https://fxosad.telenordigital.com/api/client/auth/identify'
@@ -729,7 +735,7 @@
             adManager.manageToken(token);
           }
         });
-      });
+      }, 1000);
 
       GridManager.goToLandingPage = function() {
         document.body.dataset.transitioning = 'true';

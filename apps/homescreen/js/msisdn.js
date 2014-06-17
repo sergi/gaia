@@ -27,7 +27,7 @@ var getToken = (function getTokenImpl(window) {
       callback = function noop() {};
     }
 
-    if (!opts || !opts.sim || !opts.url) {
+    if (!opts || !opts.sims || !opts.url) {
       return callback('Missing parameters');
     }
 
@@ -37,7 +37,7 @@ var getToken = (function getTokenImpl(window) {
 
     var connection;
     for (var i = 0; i < opts.sims.length; i++) {
-      var sim = window.navigator.mozMobileConnections[opts.sims[i]];
+      var sim = window.navigator.mozMobileConnections[opts.sims[i].slot];
       if (sim && sim.data && sim.data.network) {
         connection = opts.sims[i];
       }
