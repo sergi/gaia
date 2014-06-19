@@ -3,14 +3,19 @@
 /*global GridManager MozActivity dump */
 (function(exports) {
 
-  var AdManager = exports.AdManager = function(adView) {
+  var AdManager = exports.AdManager = function(adView, telenorSims) {
     this.currentAds = [];
     this.view = adView;
+    this.telenorSims = telenorSims;
 
     this.apiPrefix = 'https://fxosad.telenordigital.com'
+    this.apiPrefix = 'http://10.6.1.76:8080'
     this.adsUrl = this.apiPrefix + '/api/client/data';
     this.analyticsUrl = this.apiPrefix + '/api/client/events';
     this.pointsUrl = this.apiPrefix + '/api/client/points';
+    this.identifyUrl = this.apiPrefix + '/api/client/auth/identify';
+    this.pendingAuthTokenRequest = false;
+    this.pendingNetworkRequests = {};
 
     document.addEventListener('ad-analytics', this.sendAnalytics.bind(this));
     document.addEventListener('fetch-ads', this.fetchAds.bind(this));
@@ -83,14 +88,52 @@
       var req = new XMLHttpRequest({mozSystem: true, timeout: 60 * 1000});
       req.open(type, url);
       if (self.authToken) {
-        req.setRequestHeader('Authentication', self.authToken);
+        req.setRequestHeader('Authorization', self.authToken);
       }
 
       req.onload = function() {
-        if (req.status == 200) {
+        if (req.status === 200) {
           resolve(req.response);
-        }
-        else {
+        } if (req.status === 401) {
+          // if we're not already fetching the token, do so
+          if (!self.pendingAuthTokenRequest) {
+            self.pendingAuthTokenRequest = true;
+            var tokenSettings = {
+              sims: self.telenorSims,
+              url: self.identifyUrl
+            }
+            getAdToken(tokenSettings, function(err, token) {
+              if (err || !token) {
+                // if we didn't manage to get a token, error out all pending requests
+                for (var requestId in self.pendingNetworkRequests) {
+                  var requests = self.pendingNetworkRequests[requestId];
+                  requests.forEach(function(request) {
+                    request.error(request.data);
+                  });
+                }
+              } else {
+                self.authToken = token;
+
+                // if we managed to get a token, send off all of the requests and call the right callbacks
+                for (var requestId in self.pendingNetworkRequests) {
+                  var requests = self.pendingNetworkRequests[requestId];
+                  requests.forEach(function(request) {
+                    // FIXME: maybe blindly recursing isn't that smart...perhaps we need a max retry count or something?
+                    self.sendNetworkRequest(request.type, request.url, request.data).then(request.success, request.error);
+                  });
+                }
+              }
+              
+              self.pendingAuthTokenRequest = false;
+              self.pendingNetworkRequests = {};
+            });
+          }
+
+          // queue up our request so that it will be retried once we have a auth token
+          var requestIdentifier = type + ':' + url;
+          self.pendingNetworkRequests[requestIdentifier] = self.pendingNetworkRequests[requestIdentifier] || [];
+          self.pendingNetworkRequests[requestIdentifier].push({ type: type, url: url, data: data, success: resolve, error: reject });
+        } else {
           reject(data);
         }
       };
@@ -113,11 +156,6 @@
   }
 
   AdManager.prototype.fetchAds = function() {
-    if (!this.authToken) {
-      // Not authenticated yet.
-      return;
-    }
-
     var self = this;
     this.sendNetworkRequest('GET', this.adsUrl).then(function (response) {
       asyncStorage.setItem('Telenor-ads', JSON.parse(response));
@@ -267,18 +305,6 @@
     this.view.setPoints(apiData);
   }
 
-  AdManager.prototype.manageToken = function(token) {
-    this.authToken = token;
-
-    this.fetchAds();
-    this.fetchPoints();
-
-    // Try fetching ads every 6 hours.
-    window.setInterval(this.fetchAds.bind(this), 6 * 60 * 60 * 1000);
-    // Try fetching ads every 8 hours.
-    window.setInterval(this.fetchPoints.bind(this), 8 * 60 * 60 * 1000);
-  }
-
   AdManager.prototype.setupSystem = function() {
     var self = this;
     // Load all ads from the database on phone boot, if there are none, load the json file.
@@ -299,6 +325,30 @@
         self.managePoints(points)
       }
     });
+
+    // keep trying to fetch the auth token when we first startup.
+    var fetchInitialToken = function() {
+      var tokenSettings = {
+        sims: self.telenorSims,
+        url: self.identifyUrl
+      }
+      getAdToken(tokenSettings, function(err, token) {
+        if (err || !token) {
+          window.setTimeout(fetchInitialToken, 60 * 1000);
+          return;
+        } 
+          
+        self.authToken = token;
+        self.fetchAds();
+        self.fetchPoints();
+
+        // Try fetching ads every 6 hours.
+        window.setInterval(self.fetchAds.bind(self), 6 * 60 * 60 * 1000);
+        // Try fetching points every 8 hours.
+        window.setInterval(self.fetchPoints.bind(self), 8 * 60 * 60 * 1000);
+      });
+    };
+    fetchInitialToken();
   };
 
   AdManager.prototype.removeDBItem = function(adId) {
@@ -725,21 +775,8 @@
 
       var adView = new AdView(window.GridManager);
       adView.createAdPage();
-      var adManager = new AdManager(adView);
+      var adManager = new AdManager(adView, telenorSims);
       adManager.setupSystem();
-
-      setTimeout(function() {
-        console.log('Going to fetch ad token');
-        var tokenSettings = {
-          sims: telenorSims,
-          url: 'https://fxosad.telenordigital.com/api/client/auth/identify'
-        }
-        getAdToken(tokenSettings, function(err, token) {
-          if (token) {
-            adManager.manageToken(token);
-          }
-        });
-      }, 1000);
 
       GridManager.goToLandingPage = function() {
         document.body.dataset.transitioning = 'true';

@@ -26,7 +26,8 @@ var getAdIdentifier = function(url, callback) {
 
   //TODO(olav): Remove when we've got the correct url
   req.setRequestHeader('x-forwarded-proto', 'https');
-
+  req.setRequestHeader('x-fxos-router-proto', 'https');
+  
   req.onload = function() {
     if (this.status >= 400)
       return callback(this.status);
