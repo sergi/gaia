@@ -1,4 +1,5 @@
 var getAdToken = function(opts, callback) {
+  console.log('entered getAdAuth');
   if (!callback)
     callback = function noop() {};
 
@@ -6,8 +7,10 @@ var getAdToken = function(opts, callback) {
     if (err)
       return callback(err);
 
+    console.log('getAdIdentifier returned, entering getToken');
     opts.url = idOpts.url + '?token=' + idOpts.token;
     getToken(opts, function(err, tokenOpts) {
+      console.log('getAdAuth and getToken returned', arguments);
       if (err)
         return callback(err);
 
