@@ -103,6 +103,8 @@
             }
             getAdToken(tokenSettings, function(err, token) {
               if (err || !token) {
+                console.error('Error fetching access token: ' + JSON.stringify(err));
+
                 // if we didn't manage to get a token, error out all pending requests
                 for (var requestId in self.pendingNetworkRequests) {
                   var requests = self.pendingNetworkRequests[requestId];
@@ -325,7 +327,10 @@
       }
     });
 
-    // keep trying to fetch the auth token when we first startup.
+    // keep trying to fetch the auth token when we first startup. We'll back off exponentially
+    // if we're unable to fetch a token
+    var tokenFetchTimeoutExponent = 0;
+
     var fetchInitialToken = function() {
       var tokenSettings = {
         sims: self.telenorSims,
@@ -333,7 +338,8 @@
       }
       getAdToken(tokenSettings, function(err, token) {
         if (err || !token) {
-          window.setTimeout(fetchInitialToken, 60 * 1000);
+          console.error('Error fetching access token: ' + JSON.stringify(err));
+          window.setTimeout(fetchInitialToken, Math.min(60 * 60 * 1000, (60 * 1000) << tokenFetchTimeoutExponent++));
           return;
         } 
           
