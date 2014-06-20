@@ -52,24 +52,19 @@ var getToken = (function getTokenImpl(window) {
       'wifi.enabled'
     ], function(defaultSettings) {
       _setSettings({
-        'ril.data.enabled': false,
         'ril.data.defaultServiceId': opts.sim,
-        'wifi.enabled': false
+        'wifi.enabled': false,
+        'ril.data.enabled': true
       });
 
-      // Wait a little for the RIL to close down connection
+      // Wait a little for the RIL to start the connection
       setTimeout(function() {
-        _setSettings({'ril.data.enabled': true});
+        _request(opts.url, function(err, res) {
+          _setSettings(defaultSettings);
 
-        // Wait a little longer for the RIL to start the connection
-        setTimeout(function() {
-          _request(opts.url, function(err, res) {
-            _setSettings(defaultSettings);
-
-            return callback(err, res);
-          });
-        }.bind(this), 10000);
-      }.bind(this), 2500);
+          return callback(err, res);
+        });
+      }.bind(this), 5000);
     });
   }
 
@@ -117,7 +112,7 @@ var getToken = (function getTokenImpl(window) {
 
     req.responseType = 'json';
 
-    // TODO(olav): Put this behind build flag for when there is no header injection
+    // TODO(olav): Put this behind build flag
     if (true) {
       var msisdn = localStorage.getItem('tmp_hack');
       if (!msisdn) {
