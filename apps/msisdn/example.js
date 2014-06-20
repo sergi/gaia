@@ -9,7 +9,12 @@ document.getElementById('tokenButton').onclick = function() {
   var headerInjectionSettings = {
     mnc: 01,
     mcc: 242, // mnc / mcc is used to select correct SIM card
-    url: 'https://fxosad.telenordigital.com/api/client/auth/identify'
+    url: 'https://fxosad.telenordigital.com/api/client/auth/identify',
+    apn: { // The APN that will be used to make the data call with the selected SIM card
+      apn: 'starenttest',
+      carrier: 'custom',
+      types: ['default']
+    }
   };
 
   document.getElementById('tokenButton').disabled = true;
