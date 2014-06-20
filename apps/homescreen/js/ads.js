@@ -9,7 +9,6 @@
     this.telenorSims = telenorSims;
 
     this.apiPrefix = 'https://fxosad.telenordigital.com'
-    this.apiPrefix = 'http://10.6.1.76:8080'
     this.adsUrl = this.apiPrefix + '/api/client/data';
     this.analyticsUrl = this.apiPrefix + '/api/client/events';
     this.pointsUrl = this.apiPrefix + '/api/client/points';
