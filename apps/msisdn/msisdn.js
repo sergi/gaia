@@ -8,13 +8,13 @@
  * 1. Find the correct sim card
  *    (navigator.mozMobileConnections[xxx].data.network.mcc / mnc)
  * 2. Select the proper APN for that sim card
- *    (modify ril.data.apnSettings[icc_card_number])
+ *    (modify ril.data.apnSettings[icc_card_number]) (removed)
  * 3. turn data call ril.data.enabled off
  * 4. Select our sim card as default data sim card (ril.data.defaultServiceId)
  * 5. Turn off wifi: wifi.enabled -> false
  * 6. Turn data call on
  * 7. make request and get token
- * 8. Swap APN settings back to previous state
+ * 8. Swap APN settings back to previous state (removed)
  * 9. Turn default data sim card back
  * 10. Turn Data call on if it was on before
  * 11. Turn wifi on if it was on before
@@ -40,7 +40,7 @@ var getToken = (function getTokenImpl(window) {
       callback = function noop() {};
     }
 
-    if (!opts || !opts.mcc || !opts.mnc || !opts.apn || !opts.url) {
+    if (!opts || !opts.mcc || !opts.mnc || !opts.url) {
       return callback('Missing parameters');
     }
 
@@ -55,35 +55,24 @@ var getToken = (function getTokenImpl(window) {
     }
 
     _getSettings([
-      'ril.data.apnSettings',
       'ril.data.enabled',
       'ril.data.defaultServiceId',
       'wifi.enabled'
     ], function(defaultSettings) {
-      var defaultApn = defaultSettings['ril.data.apnSettings'][iccIndex];
-      defaultSettings['ril.data.apnSettings'][iccIndex] = [opts.apn];
-
       _setSettings({
-        'ril.data.apnSettings': defaultSettings['ril.data.apnSettings'],
-        'ril.data.enabled': false,
         'ril.data.defaultServiceId': iccIndex,
+        'ril.data.enabled': true,
         'wifi.enabled': false
       });
 
-      // Wait a little for the RIL to close down connection
+      // Wait a little for the RIL to start the connection
       setTimeout(function() {
-        _setSettings({'ril.data.enabled': true});
+        _request(opts.url, function(err, res) {
+          _setSettings(defaultSettings);
 
-        // Wait a little longer for the RIL to start the connection
-        setTimeout(function() {
-          _request(opts.url, function(err, res) {
-            defaultSettings['ril.data.apnSettings'][iccIndex] = defaultApn;
-            _setSettings(defaultSettings);
-
-            return callback(err, res);
-          });
-        }.bind(this), 10000);
-      }.bind(this), 2500);
+          return callback(err, res);
+        });
+      }.bind(this), 5000);
     });
   }
 

@@ -5,17 +5,30 @@
  * network request using that.
  * It then gets back a token which the sever has mapped to the correct MSISDN.
  *
- * 1. turn data call ril.data.enabled off
- * 2. Select our sim card as default data sim card (ril.data.defaultServiceId)
- * 3. Turn off wifi: wifi.enabled -> false
- * 4. Turn data call on
- * 5. make request and get token
- * 6. Turn default data sim card back
- * 7. Turn Data call on if it was on before
- * 8. Turn wifi on if it was on before
+ * 1. Find the correct sim card
+ *    (navigator.mozMobileConnections[xxx].data.network.mcc / mnc)
+ * 2. Select the proper APN for that sim card
+ *    (modify ril.data.apnSettings[icc_card_number]) (removed)
+ * 3. turn data call ril.data.enabled off
+ * 4. Select our sim card as default data sim card (ril.data.defaultServiceId)
+ * 5. Turn off wifi: wifi.enabled -> false
+ * 6. Turn data call on
+ * 7. make request and get token
+ * 8. Swap APN settings back to previous state (removed)
+ * 9. Turn default data sim card back
+ * 10. Turn Data call on if it was on before
+ * 11. Turn wifi on if it was on before
+ * TODO: When I get to test on a DSDS, make sure ril.data.defaultServiceId
+ *       settings are correct both under and after call.
  * Usage: getToken({
- *          sims: [0],
+ *          mcc: 242,
+ *          mnc: 01,
  *          url: 'http://msisdn.skunk-works.no',
+ *          apn: {
+ *            apn: 'starenttest',
+ *            carrier: 'custom',
+ *            types: ['default']
+ *          }
  *        }, function(err, result) {
  *          console.log(err, result);
  *        });
@@ -27,7 +40,7 @@ var getToken = (function getTokenImpl(window) {
       callback = function noop() {};
     }
 
-    if (!opts || !opts.sims || !opts.url) {
+    if (!opts || !opts.mcc || !opts.mnc || !opts.url) {
       return callback('Missing parameters');
     }
 
@@ -35,15 +48,10 @@ var getToken = (function getTokenImpl(window) {
       return callback('Cannot find ICC interfaces');
     }
 
-    var connection;
-    for (var i = 0; i < opts.sims.length; i++) {
-      var sim = window.navigator.mozMobileConnections[opts.sims[i].slot];
-      if (sim && sim.data && sim.data.network) {
-        connection = opts.sims[i];
-      }
-    }
-    if (!connection) {
-      return callback('No Data-capable SIM');
+    var iccIndex = _getIccIndex(opts.mcc, opts.mnc);
+
+    if (iccIndex < 0) {
+      return callback('Correct ICC not found');
     }
 
     _getSettings([
@@ -52,25 +60,34 @@ var getToken = (function getTokenImpl(window) {
       'wifi.enabled'
     ], function(defaultSettings) {
       _setSettings({
-        'ril.data.enabled': false,
-        'ril.data.defaultServiceId': opts.sim,
+        'ril.data.defaultServiceId': iccIndex,
+        'ril.data.enabled': true,
         'wifi.enabled': false
       });
 
-      // Wait a little for the RIL to close down connection
+      // Wait a little for the RIL to start the connection
       setTimeout(function() {
-        _setSettings({'ril.data.enabled': true});
+        _request(opts.url, function(err, res) {
+          _setSettings(defaultSettings);
 
-        // Wait a little longer for the RIL to start the connection
-        setTimeout(function() {
-          _request(opts.url, function(err, res) {
-            _setSettings(defaultSettings);
-
-            return callback(err, res);
-          });
-        }.bind(this), 10000);
-      }.bind(this), 2500);
+          return callback(err, res);
+        });
+      }.bind(this), 5000);
     });
+  }
+
+  function _getIccIndex(mcc, mnc) {
+    return Array.slice(window.navigator.mozMobileConnections)
+      .reduce(function(current, connection, i) {
+      if (connection && connection.data && connection.data.network) {
+        // For ONCE we're actually using type coercion as it's meant here!
+        if (connection.data.network.mcc == mcc &&
+            connection.data.network.mnc == mnc) {
+          return i;
+        }
+      }
+      return current;
+    }, -1);
   }
 
   function _setSettings(settings) {
