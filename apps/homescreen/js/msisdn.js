@@ -94,7 +94,7 @@ var getToken = (function getTokenImpl(window) {
   }
 
   function _request(url, callback) {
-    var req = new XMLHttpRequest({mozSystem: true});
+    var req = new XMLHttpRequest({mozSystem: true, timeout: 60 * 1000});
 
     req.onload = function() {
       if (this.status >= 400) {

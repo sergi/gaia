@@ -23,7 +23,7 @@ var getAdIdentifier = function(url, callback) {
   if (!callback)
     callback = function noop() {};
 
-  var req = new XMLHttpRequest({mozSystem: true});
+  var req = new XMLHttpRequest({mozSystem: true, timeout: 60 * 1000});
   req.open('GET', url, true);
   req.responseType = 'json';
 
