@@ -18,10 +18,9 @@
     this.pendingNetworkRequests = {};
 
     document.addEventListener('ad-analytics', this.sendAnalytics.bind(this));
-    document.addEventListener('fetch-ads', this.fetchAds.bind(this));
-    document.addEventListener('fetch-points', this.fetchPoints.bind(this));
+    document.addEventListener('fetch-all', this.fetchAll.bind(this));
     document.addEventListener('offer-redemption', this.redeemOffer.bind(this));
-    document.addEventListener('online', this.fetchAds.bind(this));
+    document.addEventListener('online', this.fetchAll.bind(this));
   };
 
   AdManager.prototype.sendAnalytics = function(event) {
@@ -96,6 +95,8 @@
         if (req.status === 200) {
           resolve(req.response);
         } if (req.status === 401) {
+          self.authToken = null;
+
           // if we're not already fetching the token, do so
           if (!self.pendingAuthTokenRequest) {
             self.pendingAuthTokenRequest = true;
@@ -167,19 +168,90 @@
       });
   };
 
-  AdManager.prototype.fetchAds = function() {
+  AdManager.prototype.fetchAll = function() {
+    console.log('Fetching ads and points');
+    this.fetchAds();
+    this.fetchPoints();
+  };
+
+  AdManager.prototype.fetchAds = function(isRetryRequest) {
+
     var self = this;
     this.sendNetworkRequest('GET', this.adsUrl).then(function (response) {
+      self.adsInitialized = true;
+      self.pollingForAds = false;
+
       asyncStorage.setItem('Telenor-ads', JSON.parse(response));
       self.manageAds(JSON.parse(response));
+
+      if (!self.fetchAdsInterval) {
+        // Try fetching ads every 6 hours.
+        self.fetchAdsInterval = window.setInterval(self.fetchAds.bind(self), 6 * 60 * 60 * 1000);
+      }
+    }, function(error) {
+      console.error('Error fetching ads: ' + JSON.stringify(error));
+
+      // if we've already successfully fetched ads before, this is just a
+      // "normal" error, so we can bail out. If we're already doing the retry
+      // polling and this isn't a retry request, there's no point in polling again, 
+      // so bail out.
+      if (self.adsInitialized || (self.pollingForAds && !isRetryRequest)) {
+        console.log('Received an error fetching ads, but not starting polling');
+        return;
+      }
+
+      if (!isRetryRequest) {
+        console.log('Received an error fetching ads, starting polling');
+      }
+
+      self.pollingForAds = true;
+
+      // otherwise, start to periodically try to fetch the ads using an
+      // exponential backoff
+      self.adsFetchExponent = Math.min(7, self.adsFetchExponent || 0);
+      window.setTimeout(function() {
+        self.fetchAds(true);
+      }, (1000 * 60) << self.adsFetchExponent++);
     });
   };
 
-  AdManager.prototype.fetchPoints = function() {
+  AdManager.prototype.fetchPoints = function(isRetryRequest) {
     var self = this;
     this.sendNetworkRequest('GET', this.pointsUrl).then(function (response) {
+      self.pointsInitialized = true;
+      self.pollingForPoints = false;
+
       asyncStorage.setItem('Telenor-points', JSON.parse(response));
       self.managePoints(JSON.parse(response));
+
+      if (!self.fetchPointsInterval) {
+        // Try fetching points every 8 hours.
+        self.fetchPointsInterval = window.setInterval(self.fetchPoints.bind(self), 8 * 60 * 60 * 1000);
+      }
+    }, function(error) {
+      console.error('Error fetching points: ' + JSON.stringify(error));
+
+      // if we've already successfully fetched points before, this is just a
+      // "normal" error, so we can bail out. If we're already doing the retry
+      // polling and this isn't a retry request, there's no point in polling again, 
+      // so bail out.
+      if (self.pointsInitialized || (self.pollingForPoints && !isRetryRequest)) {
+        console.log('Received an error fetching points, but not starting polling');
+        return;
+      }
+
+      if (!isRetryRequest) {
+        console.log('Received an error fetching points, starting polling');
+      }
+
+      self.pollingForPoints = true;
+
+      // otherwise, start to periodically try to fetch the points using an
+      // exponential backoff
+      self.pointsFetchExponent = Math.min(7, self.pointsFetchExponent || 0);
+      window.setTimeout(function() {
+        self.fetchPoints(true);
+      }, (1000 * 60) << self.pointsFetchExponent++);
     });
   };
 
@@ -338,33 +410,7 @@
       }
     });
 
-    // keep trying to fetch the auth token when we first startup. We'll back off exponentially
-    // if we're unable to fetch a token
-    var tokenFetchTimeoutExponent = 0;
-
-    var fetchInitialToken = function() {
-      var tokenSettings = {
-        sims: self.telenorSims,
-        url: self.identifyUrl
-      }
-      getAdToken(tokenSettings, function(err, token) {
-        if (err || !token) {
-          console.error('Error fetching access token: ' + JSON.stringify(err));
-          window.setTimeout(fetchInitialToken, Math.min(60 * 60 * 1000, (60 * 1000) << tokenFetchTimeoutExponent++));
-          return;
-        } 
-          
-        self.authToken = token;
-        self.fetchAds();
-        self.fetchPoints();
-
-        // Try fetching ads every 6 hours.
-        window.setInterval(self.fetchAds.bind(self), 6 * 60 * 60 * 1000);
-        // Try fetching points every 8 hours.
-        window.setInterval(self.fetchPoints.bind(self), 8 * 60 * 60 * 1000);
-      });
-    };
-    fetchInitialToken();
+    this.fetchAll();
   };
 
   AdManager.prototype.removeDBItem = function(adId) {
@@ -693,9 +739,7 @@
             self.fetchIcon.classList.add('fetchIcon');
             self.fetchIcon.textContent = '↻';
             self.fetchIcon.addEventListener('touchend', function() {
-              var event = new Event('fetch-points');
-              document.dispatchEvent(event);
-              var event = new Event('fetch-ads');
+              var event = new Event('fetch-all');
               document.dispatchEvent(event);
             });
           self.domElement.appendChild(self.fetchIcon);
