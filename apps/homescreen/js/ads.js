@@ -13,12 +13,14 @@
     this.analyticsUrl = this.apiPrefix + '/api/client/events';
     this.pointsUrl = this.apiPrefix + '/api/client/points';
     this.identifyUrl = this.apiPrefix + '/api/client/auth/identify';
+    this.offersUrl = this.apiPrefix + '/api/client/offers/';
     this.pendingAuthTokenRequest = false;
     this.pendingNetworkRequests = {};
 
     document.addEventListener('ad-analytics', this.sendAnalytics.bind(this));
     document.addEventListener('fetch-ads', this.fetchAds.bind(this));
     document.addEventListener('fetch-points', this.fetchPoints.bind(this));
+    document.addEventListener('offer-redemption', this.redeemOffer.bind(this));
     document.addEventListener('online', this.fetchAds.bind(this));
   };
 
@@ -155,6 +157,15 @@
       }
     });
   }
+
+  AdManager.prototype.redeemOffer = function(event) {
+    this.sendNetworkRequest('POST', this.offersUrl + event.detail.offerId + '/activate')
+      .then(function(response) {
+        console.log('Activated offer: ' + JSON.stringify(response));
+      }, function(error) {
+        console.error('Error activating offer: ' + JSON.stringify(error));
+      });
+  };
 
   AdManager.prototype.fetchAds = function() {
     var self = this;
@@ -631,7 +642,8 @@
   DetailedCard.prototype.redeem = function() {
     this.sendClickAnalytics();
     this.redeemContainer.style.visibility = 'hidden';
-    //TODO Hook up actual redeeming code.
+    var event = new CustomEvent('offer-redemption', { detail: { offerId: this.cardData.id }});
+    document.dispatchEvent(event);
   }
 
   DetailedCard.prototype.sendClickAnalytics = function() {
