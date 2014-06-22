@@ -136,7 +136,12 @@
           // queue up our request so that it will be retried once we have a auth token
           var requestIdentifier = type + ':' + url;
           self.pendingNetworkRequests[requestIdentifier] = self.pendingNetworkRequests[requestIdentifier] || [];
-          self.pendingNetworkRequests[requestIdentifier].push({ type: type, url: url, data: data, success: resolve, error: reject });
+          if (!(type === 'GET' && self.pendingNetworkRequests[requestIdentifier].length)) {
+            console.log('Request to ' + url + '(' + type + ') queued for trying after auth token is fetched');
+            self.pendingNetworkRequests[requestIdentifier].push({ type: type, url: url, data: data, success: resolve, error: reject });
+          } else {
+            reject(data);
+          }
         } else {
           reject(data);
         }
