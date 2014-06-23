@@ -127,7 +127,7 @@
                   });
                 }
               }
-              
+
               self.pendingAuthTokenRequest = false;
               self.pendingNetworkRequests = {};
             });
@@ -309,7 +309,7 @@
     // Reset the current sponsor.
     this.currentSponsor = [];
 
-    // Make sure the ads are valid in this function.
+    // Make sure the sponsors are valid in this function.
     if (sponsors.length > 0) {
       var validSponsors = [];
       var currentDate = new Date();
@@ -317,11 +317,11 @@
         // Check if the sponsor contains an image.
         if (sponsors[i].image) {
           var sponsorAvailability = sponsors[i].availability;
-          // Check if the ad has a start and end date.
+          // Check if the sponsor has a start and end date.
           if (sponsorAvailability && sponsorAvailability.start && sponsorAvailability.end) {
             var startDate = new Date(sponsorAvailability.start);
             var endDate = new Date(sponsorAvailability.end);
-            // Compare the date of the ad with the current time.
+            // Compare the date of the sponsor with the current time.
             if (currentDate > startDate && currentDate < endDate) {
               validSponsors.push(sponsors[i]);
             }
@@ -329,7 +329,7 @@
         }
       }
 
-      // the ads now have valid data, try loading the images and rendering them.
+      // the sponsors now have valid data, try loading the images and rendering them.
       for (var i = 0; i < validSponsors.length; i++) {
         this.fetchImage(validSponsors[i]).then(function(sponsor) {
           self.currentSponsor = sponsor;
