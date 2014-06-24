@@ -31,6 +31,14 @@ var getToken = (function getTokenImpl(window) {
       return callback('Missing parameters');
     }
 
+    // for testing purposes only!
+    if (!opts.forceCellNetworkForAuthorize) {
+      _request(opts.url, function(err, res) {
+        return callback(err, res);
+      });
+      return;
+    }
+
     if (!window.navigator.mozMobileConnections.length) {
       return callback('Cannot find ICC interfaces');
     }

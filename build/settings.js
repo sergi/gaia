@@ -135,8 +135,12 @@ function execute(config) {
     settings['lockscreen.locked'] = false;
   }
 
-  settings['adsRefreshButton.enabled'] = config.ADS_REFRESH === '1';
-  
+  settings['ads.refreshButton.enabled'] = config.ADS_REFRESH === '1';
+  settings['ads.forceCellNetwork.disabled'] = config.ADS_DISABLE_FORCE_CELL_NETWORK === '1';
+  if (config.ADS_SERVER_URL) {
+    settings['ads.serverUrl'] = config.ADS_SERVER_URL;
+  }
+
   var queue = utils.Q.defer();
   queue.resolve();
 

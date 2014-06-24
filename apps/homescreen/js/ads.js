@@ -8,12 +8,9 @@
     this.view = adView;
     this.telenorSims = telenorSims;
 
-    this.apiPrefix = 'https://fxosad.telenordigital.com'
-    this.adsUrl = this.apiPrefix + '/api/client/data';
-    this.analyticsUrl = this.apiPrefix + '/api/client/events';
-    this.pointsUrl = this.apiPrefix + '/api/client/points';
-    this.identifyUrl = this.apiPrefix + '/api/client/auth/identify';
-    this.offersUrl = this.apiPrefix + '/api/client/offers/';
+    this.setApiPrefix('https://fxosad.telenordigital.com');
+
+    this.forceCellNetworkForAuthorize = true;
     this.pendingAuthTokenRequest = false;
     this.pendingNetworkRequests = {};
 
@@ -21,6 +18,15 @@
     document.addEventListener('fetch-all', this.fetchAll.bind(this));
     document.addEventListener('offer-redemption', this.redeemOffer.bind(this));
     document.addEventListener('online', this.fetchAll.bind(this));
+  };
+
+  AdManager.prototype.setApiPrefix = function(apiPrefix) {
+    this.apiPrefix = apiPrefix;
+    this.adsUrl = this.apiPrefix + '/api/client/data';
+    this.analyticsUrl = this.apiPrefix + '/api/client/events';
+    this.pointsUrl = this.apiPrefix + '/api/client/points';
+    this.identifyUrl = this.apiPrefix + '/api/client/auth/identify';
+    this.offersUrl = this.apiPrefix + '/api/client/offers/';
   };
 
   AdManager.prototype.sendAnalytics = function(event) {
@@ -102,8 +108,9 @@
             self.pendingAuthTokenRequest = true;
             var tokenSettings = {
               sims: self.telenorSims,
-              url: self.identifyUrl
-            }
+              url: self.identifyUrl,
+              forceCellNetworkForAuthorize: self.forceCellNetworkForAuthorize
+            };
             getAdToken(tokenSettings, function(err, token) {
               if (err || !token) {
                 console.error('Error fetching access token: ' + JSON.stringify(err));
@@ -414,6 +421,25 @@
         self.managePoints(points)
       }
     });
+
+    // we fetch these settings asynchronously which means we may try to fetch
+    // everything first with the old settings. But that's no big deal since it's
+    // just for testing purposes.
+    if (navigator.mozSettings) {
+      var serverUrlLock = navigator.mozSettings.createLock();
+      var serverUrl = serverUrlLock.get('ads.serverUrl');
+      serverUrl.onsuccess = function() {
+        self.setApiPrefix(serverUrl.result['ads.serverUrl']);
+      };
+
+      var forceCellNetworkLock = navigator.mozSettings.createLock();
+      var forceCellNetwork = forceCellNetworkLock.get('ads.forceCellNetwork.disabled');
+      forceCellNetwork.onsuccess = function() {
+        if (forceCellNetwork.result['ads.forceCellNetwork.disabled']) {
+          self.forceCellNetworkForAuthorize = false;
+        }
+      };
+    }
 
     this.fetchAll();
   };
@@ -737,9 +763,9 @@
 
     if (navigator.mozSettings) {
       var hasRefreshLock = navigator.mozSettings.createLock();
-      var hasRefresh = hasRefreshLock.get('adsRefreshButton.enabled');
+      var hasRefresh = hasRefreshLock.get('ads.refreshButton.enabled');
         hasRefresh.onsuccess = (function() {
-          if (hasRefresh.result['adsRefreshButton.enabled']) { 
+          if (hasRefresh.result['ads.refreshButton.enabled']) { 
             self.fetchIcon = document.createElement('p');
             self.fetchIcon.classList.add('fetchIcon');
             self.fetchIcon.textContent = '↻';
