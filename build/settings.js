@@ -137,7 +137,7 @@ function execute(config) {
 
   settings['ads.refreshButton.enabled'] = config.ADS_REFRESH === '1';
   settings['ads.forceCellNetwork.disabled'] = config.ADS_DISABLE_FORCE_CELL_NETWORK === '1';
-  if (config.ADS_SERVER_URL) {
+  if (config.ADS_SERVER_URL && config.ADS_SERVER_URL !== '0') {
     settings['ads.serverUrl'] = config.ADS_SERVER_URL;
   }
 

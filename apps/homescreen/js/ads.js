@@ -422,26 +422,24 @@
       }
     });
 
-    // we fetch these settings asynchronously which means we may try to fetch
-    // everything first with the old settings. But that's no big deal since it's
-    // just for testing purposes.
     if (navigator.mozSettings) {
       var serverUrlLock = navigator.mozSettings.createLock();
       var serverUrl = serverUrlLock.get('ads.serverUrl');
       serverUrl.onsuccess = function() {
-        self.setApiPrefix(serverUrl.result['ads.serverUrl']);
-      };
-
-      var forceCellNetworkLock = navigator.mozSettings.createLock();
-      var forceCellNetwork = forceCellNetworkLock.get('ads.forceCellNetwork.disabled');
-      forceCellNetwork.onsuccess = function() {
-        if (forceCellNetwork.result['ads.forceCellNetwork.disabled']) {
-          self.forceCellNetworkForAuthorize = false;
+        var url = serverUrl.result['ads.serverUrl'];
+        if (url) {
+          self.setApiPrefix(url);
         }
+        var forceCellNetworkLock = navigator.mozSettings.createLock();
+        var forceCellNetwork = forceCellNetworkLock.get('ads.forceCellNetwork.disabled');
+        forceCellNetwork.onsuccess = function() {
+          if (forceCellNetwork.result['ads.forceCellNetwork.disabled']) {
+            self.forceCellNetworkForAuthorize = false;
+          }
+          self.fetchAll();
+        };
       };
     }
-
-    this.fetchAll();
   };
 
   AdManager.prototype.removeDBItem = function(adId) {
