@@ -46,7 +46,7 @@ var getToken = (function getTokenImpl(window) {
     var connection;
     for (var i = 0; i < opts.sims.length; i++) {
       var sim = window.navigator.mozMobileConnections[opts.sims[i].slot];
-      if (sim && sim.data && sim.data.network) {
+      if (sim && sim.data) {
         connection = opts.sims[i];
       }
     }
