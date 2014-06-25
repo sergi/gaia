@@ -497,6 +497,9 @@
     // And grab the element so we can do stuff with it
     this.domElement = this.gridManager.container.firstChild;
     this.domElement.classList.add('ad-page');
+    this.domElement.addEventListener('contextmenu', function(e) {
+      e.stopPropagation();
+    });
 
     var startEvent, currentX, currentY, startX, startY, dx, dy,
         detecting = false, swiping = false, scrolling = false
