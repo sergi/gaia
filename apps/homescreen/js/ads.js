@@ -174,7 +174,9 @@
   AdManager.prototype.redeemOffer = function(event) {
     this.sendNetworkRequest('POST', this.offersUrl + event.detail.offerId + '/activate')
       .then(function(response) {
-        console.log('Activated offer: ' + JSON.stringify(response));
+        var redeemNotification = new Notification('Specials', {
+          body: 'You have successfully redeemed an offer.'
+        });
       }, function(error) {
         console.error('Error activating offer: ' + JSON.stringify(error));
       });
