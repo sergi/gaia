@@ -35,15 +35,22 @@ body[data-transitioning] #paginationBar {
 
 #summaryContainer > .intro {
   align-items: center;
-  background-image: url(images/grameenphoneSpecials320x160.png);
-  display: flex;
-  height: 150px;
+  background-image: url(images/grameenphoneHotbox320x160.png);
+  height: 160px;
   justify-content: center;
   position: relative;
 }
 
 #summaryContainer > .intro p {
   font-size: 24px;
+}
+
+#summaryContainer > .intro > .points {
+  color: #fff;
+  margin: 0;
+  padding-left: 12px;
+  padding-top: 4px;
+  text-align: left;
 }
 
 #summaryContainer > .intro .fetchIcon {
