@@ -773,7 +773,11 @@
     this.infoElement = document.createElement('img');
     this.infoElement.classList.add('info');
     this.infoElement.src = 'style/images/grameenphoneHotboxInfo.png';
+    this.infoElement.addEventListener('touchstart', function() {
+      self.infoElement.classList.add('clicked');
+    }
     this.infoElement.addEventListener('touchend', function() {
+      self.infoElement.classList.remove('clicked');
       new MozActivity({name: 'view', data: {type: 'url', url: 'http://www.grameenphone.com'}});
     });
 

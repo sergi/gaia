@@ -59,7 +59,7 @@ body[data-transitioning] #paginationBar {
   top: 10px;
 }
 
-#summaryContainer > .intro > .info:active {
+#summaryContainer > .intro > .info.clicked {
   opacity: 0.6;
 }
 
