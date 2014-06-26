@@ -53,6 +53,16 @@ body[data-transitioning] #paginationBar {
   text-align: left;
 }
 
+#summaryContainer > .intro > .info {
+  left: 100px;
+  position: absolute;
+  top: 10px;
+}
+
+#summaryContainer > .intro > .info:active {
+  opacity: 0.6;
+}
+
 #summaryContainer > .intro .fetchIcon {
   font-size: 24pt;
   margin: 0;
@@ -128,7 +138,7 @@ body[data-transitioning] #paginationBar {
   display: flex;
   flex-wrap: wrap;
   height: 100%;
-  width: 130px;
+  width: 150px;
 }
 
 #summaryContainer .summaryInfo .summaryProvider {

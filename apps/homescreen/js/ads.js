@@ -770,6 +770,13 @@
     this.pointsElement = document.createElement('p');
     this.pointsElement.classList.add('points');
 
+    this.infoElement = document.createElement('img');
+    this.infoElement.classList.add('info');
+    this.infoElement.src = 'style/images/grameenphoneHotboxInfo.png';
+    this.infoElement.addEventListener('touchend', function() {
+      new MozActivity({name: 'view', data: {type: 'url', url: 'http://www.grameenphone.com'}});
+    });
+
     if (navigator.mozSettings) {
       var hasRefreshLock = navigator.mozSettings.createLock();
       var hasRefresh = hasRefreshLock.get('ads.refreshButton.enabled');
@@ -787,6 +794,7 @@
       });
     }
     this.domElement.appendChild(this.pointsElement);
+    this.domElement.appendChild(this.infoElement);
   }
 
   OperatorCard.prototype.setPoints = function(points) {
