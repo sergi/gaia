@@ -276,7 +276,7 @@
     });
   };
 
-  AdManager.prototype.fetchImage = function(ad) {
+  AdManager.prototype.fetchImage = function(imageUrl) {
     /* Flow:
      * 1. Check if the image is on the device.
      * 2a. if success: return the old one.
@@ -286,16 +286,14 @@
      */
     var self = this;
     return new Promise(function(resolve, reject) {
-      asyncStorage.getItem(ad.image, function(imageData) {
+      asyncStorage.getItem(imageUrl, function(imageData) {
         if (imageData) {
-          ad.imageData = imageData;
-          resolve(ad);
+          resolve(imageData);
         } else {
-          self.sendNetworkRequest('GET', self.apiPrefix + ad.image + '/base64').then(
+          self.sendNetworkRequest('GET', self.apiPrefix + imageUrl + '/base64').then(
             function(response) {
-              asyncStorage.setItem(ad.image, response, function() {
-                ad.imageData = response;
-                resolve(ad);
+              asyncStorage.setItem(imageUrl, response, function() {
+                resolve(response);
               });
             },
             function(error) {
@@ -346,12 +344,13 @@
       }
 
       // the sponsors now have valid data, try loading the images and rendering them.
-      for (var i = 0; i < validSponsors.length; i++) {
-        this.fetchImage(validSponsors[i]).then(function(sponsor) {
-          self.currentSponsor = sponsor;
+      validSponsors.forEach(function(currentSponsor) {
+        this.fetchImage(currentSponsor.image).then(function(image) {
+          currentSponsor.imageData = image;
+          self.currentSponsor = currentSponsor;
           self.view.setSponsor(self.currentSponsor);
         });
-      }
+      });
     } else {
       self.view.removeSponsor();
     }
@@ -395,12 +394,21 @@
       }
 
       // the ads now have valid data, try loading the images and rendering them.
-      for (var i = 0; i < validAds.length; i++) {
-        this.fetchImage(validAds[i]).then(function(ad) {
-          self.currentAds.push(ad);
-          self.view.setAds(self.currentAds);
+      validAds.forEach(function(currentAd) {
+        self.fetchImage(currentAd.image).then(function(image) {
+          currentAd.imageData = image;
+          if (currentAd.secondaryImage) {
+            self.fetchImage(currentAd.secondaryImage).then(function(secondaryImage) {
+              currentAd.secondaryImageData = secondaryImage;
+              self.currentAds.push(currentAd);
+              self.view.setAds(self.currentAds);
+            });
+          } else {
+            self.currentAds.push(currentAd);
+            self.view.setAds(self.currentAds);
+          }
         });
-      }
+      });
     } else {
       self.view.setAds([]);
     }
@@ -577,7 +585,7 @@
   };
 
   AdView.prototype.flipCards = function() {
-    var flippableOffers = document.querySelectorAll('#summaryContainer .offer .summaryImage');
+    var flippableOffers = document.querySelectorAll('#summaryContainer .offer .summaryImage.flippable');
     for(var i = 0; i < flippableOffers.length; i++) {
       flippableOffers[i].classList.toggle('flipped');
     };
@@ -843,15 +851,18 @@
     if (data.type === 'offer') {
       var firstImage = document.createElement('div');
       firstImage.classList.add('firstImage');
-      var secondImage = document.createElement('div');
-      secondImage.classList.add('secondImage');
-
       firstImage.style.backgroundImage = 'url(' + data.imageData + ')';
-      secondImage.style.backgroundImage = 'url(' + data.imageData + ')';
 
       this.summaryImage.style.backgroundImage = '';
       this.summaryImage.appendChild(firstImage);
-      this.summaryImage.appendChild(secondImage);
+
+      if (data.secondaryImageData) {
+        var secondImage = document.createElement('div');
+        secondImage.classList.add('secondImage');
+        secondImage.style.backgroundImage = 'url(' + data.secondaryImageData + ')';
+        this.summaryImage.appendChild(secondImage);
+        this.summaryElement.classList.add('flippable');
+      }
     } else {
       this.summaryImage.style.backgroundImage = 'url(' + data.imageData + ')';
     }
