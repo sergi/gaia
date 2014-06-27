@@ -178,14 +178,12 @@
         if (response.offerSuccessText) {
           notificationContent.body = response.offerSuccessText;
         } else {
-          notificationContent.body = 'You have successfully activated an offer';
+          notificationContent.body = 'You have successfully activated an offer.';
         }
         var redeemNotification = new Notification('GP', {
           body: notificationContent.body
         });
-        redeemNotification.onclick = function(e) {
-          e.target.close();
-        }
+        redeemNotification.close();
       }, function(error) {
         console.error('Error activating offer: ' + JSON.stringify(error));
       });
