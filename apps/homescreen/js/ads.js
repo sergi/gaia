@@ -181,7 +181,7 @@
           notificationContent.body = 'You have successfully activated an offer';
         }
         var redeemNotification = new Notification('GP', {
-          body: notificationContent
+          body: notificationContent.body
         });
       }, function(error) {
         console.error('Error activating offer: ' + JSON.stringify(error));
@@ -769,6 +769,7 @@
 
     this.pointsElement = document.createElement('p');
     this.pointsElement.classList.add('points');
+    this.pointsElement.textContent = '0';
 
     this.infoElement = document.createElement('img');
     this.infoElement.classList.add('info');
