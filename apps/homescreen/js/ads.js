@@ -379,7 +379,7 @@
       var currentDate = new Date();
       for (var i = 0; i < advertisements.length; i++) {
         // Check if the ad contains an image.
-        if (advertisements[i].image) {
+        if (advertisements[i].images) {
           var adAvailability = advertisements[i].availability;
           // Check if the ad has a start and end date.
           if (adAvailability && adAvailability.start && adAvailability.end) {
@@ -395,18 +395,15 @@
 
       // the ads now have valid data, try loading the images and rendering them.
       validAds.forEach(function(currentAd) {
-        self.fetchImage(currentAd.image).then(function(image) {
-          currentAd.imageData = image;
-          if (currentAd.secondaryImage) {
-            self.fetchImage(currentAd.secondaryImage).then(function(secondaryImage) {
-              currentAd.secondaryImageData = secondaryImage;
-              self.currentAds.push(currentAd);
-              self.view.setAds(self.currentAds);
-            });
-          } else {
-            self.currentAds.push(currentAd);
-            self.view.setAds(self.currentAds);
-          }
+        var imagePromises = [];
+        currentAd.images.forEach(function(image) {
+          imagePromises.push(self.fetchImage(image));
+        });
+
+        Promise.all(imagePromises).then(function (results) {
+          currentAd.imageData = results;
+          self.currentAds.push(currentAd);
+          self.view.setAds(self.currentAds);
         });
       });
     } else {
@@ -680,6 +677,8 @@
 
     this.redeemContainer = document.createElement('div');
     this.redeemContainer.classList.add('redeemContainer');
+    this.redeemConfirmText = document.createElement('div');
+    this.redeemConfirmText.classList.add('redeemConfirmText');
     var redeemButtonsContainer = document.createElement('menu');
     redeemButtonsContainer.classList.add('redeemButtonsContainer');
     this.cancelRedeemButton = document.createElement('button');
@@ -690,6 +689,7 @@
 
     redeemButtonsContainer.appendChild(this.cancelRedeemButton);
     redeemButtonsContainer.appendChild(this.acceptRedeemButton);
+    this.redeemContainer.appendChild(this.redeemConfirmText);
     this.redeemContainer.appendChild(redeemButtonsContainer);
 
     this.cancelRedeemButton.addEventListener('touchend', function(e) {
@@ -758,7 +758,7 @@
     this.domElement.classList.add('card');
     this.domElement.classList.add(data.type);
 
-    this.image.src = data.imageData;
+    this.image.src = data.imageData[0];
     this.content.textContent = data.descriptionText;
     this.buttonText.textContent = data.buttonText;
     this.action = data.action;
@@ -768,6 +768,12 @@
       this.activationButton.style.visibility = 'hidden';
     }
     this.cardDetails.textContent = data.provider;
+    if (data.offerConfirmationText) {
+      this.redeemConfirmText.textContent = data.offerConfirmationText;
+    } else {
+      this.redeemConfirmText.textContent
+        = 'Click Confirm to activate this offer. You will receive an SMS reply upon activation';
+    }
     this.redeemContainer.style.visibility = 'hidden';
   }
 
@@ -851,20 +857,20 @@
     if (data.type === 'offer') {
       var firstImage = document.createElement('div');
       firstImage.classList.add('firstImage');
-      firstImage.style.backgroundImage = 'url(' + data.imageData + ')';
+      firstImage.style.backgroundImage = 'url(' + data.imageData[0] + ')';
 
       this.summaryImage.style.backgroundImage = '';
       this.summaryImage.appendChild(firstImage);
 
-      if (data.secondaryImageData) {
+      if (data.imageData[1]) {
         var secondImage = document.createElement('div');
         secondImage.classList.add('secondImage');
-        secondImage.style.backgroundImage = 'url(' + data.secondaryImageData + ')';
+        secondImage.style.backgroundImage = 'url(' + data.imageData[1] + ')';
         this.summaryImage.appendChild(secondImage);
         this.summaryElement.classList.add('flippable');
       }
     } else {
-      this.summaryImage.style.backgroundImage = 'url(' + data.imageData + ')';
+      this.summaryImage.style.backgroundImage = 'url(' + data.imageData[0] + ')';
     }
 
     this.summaryContent.textContent = data.descriptionText;

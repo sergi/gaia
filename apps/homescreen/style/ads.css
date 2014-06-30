@@ -189,21 +189,26 @@ body[data-transitioning] #paginationBar {
 #detailsContainer .card {
   background-color: #fff;
   border: 2px solid #fff;
+  display: flex;
+  flex-flow: row wrap;
   height: 400px;
   width: 300px;
   position: relative;
 }
 
+#detailsContainer .card .activationButton {
+  align-self: flex-end;
+  order: 4;
+}
+
 #detailsContainer .card .activationButton, .redeemContainer .redeemButtonsContainer {
   align-items: center;
   background-color: #0493c8;
-  bottom: 0;
   display: flex;
   height: 40px;
   justify-content: center;
   margin: 2%;
   padding: 0;
-  position: absolute;
   width: 96%;
 }
 
@@ -238,22 +243,31 @@ body[data-transitioning] #paginationBar {
 #detailsContainer .card .detailsImage {
   background-size: 100%;
   height: 250px;
+  order: 1;
   width: 300px;
 }
 
 #detailsContainer .card .redeemContainer {
   background-color: rgba(255,255,255,0.75);
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  justify-content: flex-end;
   position: absolute;
   top: 0;
   width: 100%;
 }
 
-#detailsContainer .card .redeemContainer .redeemButtonsContainer {
+.redeemContainer .redeemConfirmText {
+  font-size: 18px;
+  padding: 20px 15px 10px;
+}
+
+.redeemContainer .redeemButtonsContainer, .redeemContainer .redeemConfirmText {
   background-color: #fff;
 }
 
-#detailsContainer .card .redeemContainer .redeemButtonsContainer button{
+.redeemContainer .redeemButtonsContainer button{
   margin: 0 0.5rem;
 }
 
@@ -261,12 +275,15 @@ body[data-transitioning] #paginationBar {
   font-weight: bold;
   margin: 0;
   margin-right: 10px;
+  order: 2;
   text-align: right;
+  width: 100%;
 }
 
 #detailsContainer .card .content {
   font-size: 18px;
   margin: 10px 0;
+  order: 3;
 }
 
 #detailsContainer .offer {
