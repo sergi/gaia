@@ -282,8 +282,9 @@ body[data-transitioning] #paginationBar {
 
 #detailsContainer .card .content {
   font-size: 18px;
-  margin: 10px 0;
+  margin: 10px;
   order: 3;
+  width: 100%;
 }
 
 #detailsContainer .offer {
