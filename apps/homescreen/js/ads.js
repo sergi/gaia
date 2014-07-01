@@ -86,7 +86,7 @@
     } catch (ex) {
       errorCallback && errorCallback(ex);
     }
-  }
+  };
 
   AdManager.prototype.sendNetworkRequest = function(type, url, data) {
     var self = this;
@@ -169,10 +169,10 @@
         req.send();
       }
     });
-  }
+  };
 
-  AdManager.prototype.redeemOffer = function(event) {
-    this.sendNetworkRequest('POST', this.offersUrl + event.detail.offerId + '/activate')
+  AdManager.prototype.sendOfferClaimRequest = function(url) {
+    this.sendNetworkRequest('POST', this.apiPrefix + url)
       .then(function(response) {
         var notificationContent = {};
         if (response.offerSuccessText) {
@@ -187,6 +187,31 @@
       }, function(error) {
         console.error('Error activating offer: ' + JSON.stringify(error));
       });
+  };
+
+  AdManager.prototype.redeemOffer = function(event) {
+    var self = this;
+    var action = event.detail.action;
+    switch (action.type) {
+      case 'url':
+        new MozActivity({name: 'view', data: {type: 'url', url: action.url}});
+        self.sendOfferClaimRequest(action.activationUrl);
+        break;
+      case 'sms':
+        if (navigator.mozMobileMessage) {
+          var offerSMS = navigator.mozMobileMessage.send(action.phoneNumber, action.smsMessage);
+          offerSMS.onsuccess = function() {
+            self.sendOfferClaimRequest(action.activationUrl);
+          };
+        };
+        break;
+      case 'provision':
+        self.sendOfferClaimRequest(action.activationUrl);
+        break;
+      default:
+        // Do not try to activate this offer.
+        return;
+    }
   };
 
   AdManager.prototype.fetchAll = function() {
@@ -303,7 +328,7 @@
         }
       });
     });
-  }
+  };
 
   AdManager.prototype.manageAds = function(apiData) {
     var self = this;
@@ -329,7 +354,7 @@
       var currentDate = new Date();
       for (var i = 0; i < sponsors.length; i++) {
         // Check if the sponsor contains an image.
-        if (sponsors[i].image) {
+        if (sponsors[i].images) {
           var sponsorAvailability = sponsors[i].availability;
           // Check if the sponsor has a start and end date.
           if (sponsorAvailability && sponsorAvailability.start && sponsorAvailability.end) {
@@ -345,7 +370,7 @@
 
       // the sponsors now have valid data, try loading the images and rendering them.
       validSponsors.forEach(function(currentSponsor) {
-        this.fetchImage(currentSponsor.image).then(function(image) {
+        self.fetchImage(currentSponsor.images[0]).then(function(image) {
           currentSponsor.imageData = image;
           self.currentSponsor = currentSponsor;
           self.view.setSponsor(self.currentSponsor);
@@ -474,6 +499,7 @@
   };
 
   var AdView = exports.AdView =  function(gridManager) {
+    var self = this;
     this.summaryContainer = document.createElement('div');
     this.summaryContainer.id = 'summaryContainer';
     this.sponsorBanner = document.createElement('div');
@@ -482,8 +508,15 @@
     this.detailsContainer.id = 'detailsContainer';
 
     this.sponsorBanner.addEventListener('touchend', function() {
-      if (this.sponsorUrl) {
-        new MozActivity({name: 'view', data: {type: 'url', url: self.sponsorUrl}});
+      if (self.sponsorData) {
+        var eventData = [];
+        var sponsor = {};
+        sponsor.id = self.sponsorData.id
+        eventData.push({'sponsor': sponsor, 'timestamp': new Date().toISOString(), type: 'click'});
+        var event = new CustomEvent('ad-analytics', {'detail': eventData});
+        document.dispatchEvent(event);
+
+        new MozActivity({name: 'view', data: {type: 'url', url: self.sponsorData.url}});
       }
     })
 
@@ -617,7 +650,7 @@
   AdView.prototype.setSponsor = function(sponsor) {
     this.domElement.classList.add('sponsored');
     this.sponsorBanner.style.backgroundImage = 'url(' + sponsor.imageData + ')';
-    this.sponsorUrl = sponsor.url;
+    this.sponsorData = sponsor;
   }
 
   AdView.prototype.removeSponsor = function() {
@@ -737,7 +770,7 @@
   DetailedCard.prototype.redeem = function() {
     this.sendClickAnalytics();
     this.redeemContainer.style.visibility = 'hidden';
-    var event = new CustomEvent('offer-redemption', { detail: { offerId: this.cardData.id }});
+    var event = new CustomEvent('offer-redemption', { detail: { action: this.cardData.action }});
     document.dispatchEvent(event);
   }
 

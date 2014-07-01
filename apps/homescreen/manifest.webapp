@@ -19,7 +19,8 @@
     "alarms": {},
     "power":{},
     "contacts":{ "access": "readonly" },
-    "desktop-notification": {}
+    "desktop-notification": {},
+    "sms":{}
   },
   "locales": {
     "ar": {
