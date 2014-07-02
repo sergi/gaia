@@ -26,7 +26,6 @@
     this.analyticsUrl = this.apiPrefix + '/api/client/events';
     this.pointsUrl = this.apiPrefix + '/api/client/points';
     this.identifyUrl = this.apiPrefix + '/api/client/auth/identify';
-    this.offersUrl = this.apiPrefix + '/api/client/offers/';
   };
 
   AdManager.prototype.sendAnalytics = function(event) {
