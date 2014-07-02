@@ -827,6 +827,12 @@
     });
     this.infoElement.addEventListener('touchend', function() {
       self.infoElement.classList.remove('clicked');
+   
+      var eventData = [];
+      eventData.push({'timestamp': new Date().toISOString(), type: 'info'});
+      var event = new CustomEvent('ad-analytics', {'detail': eventData});
+      document.dispatchEvent(event);
+
       new MozActivity({name: 'view', data: {type: 'url', url: 'http://www.grameenphone.com'}});
     });
 
