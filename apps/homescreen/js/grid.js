@@ -965,7 +965,7 @@ var GridManager = (function() {
 
     appMgr.oninstall = function oninstall(event) {
       if (Configurator.isSingleVariantReady) {
-        GridManager.install(event.application, globalOffset);
+        GridManager.install(event.application);
       } else {
         pendingInstallRequests.push(event.application);
       }
@@ -1502,6 +1502,12 @@ var GridManager = (function() {
      */
     install: function gm_install(app, gridPageOffset, extra) {
       extra = extra || {};
+
+      if (gridPageOffset) {
+        gridPageOffset = gridPageOffset + globalOffset;
+      } else {
+        gridPageOffset = globalOffset;
+      }
 
       processApp(app, null, gridPageOffset);
 
