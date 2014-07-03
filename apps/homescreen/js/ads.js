@@ -183,6 +183,8 @@
           body: notificationContent.body
         });
         redeemNotification.close();
+        var event = new Event('fetch-all');
+        document.dispatchEvent(event);
       }, function(error) {
         console.error('Error activating offer: ' + JSON.stringify(error));
       });
