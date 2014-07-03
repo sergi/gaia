@@ -14,6 +14,8 @@
     this.pendingAuthTokenRequest = false;
     this.pendingNetworkRequests = {};
 
+    navigator.mozSetMessageHandler('alarm', this.handleAlarm.bind(this));
+
     document.addEventListener('ad-analytics', this.sendAnalytics.bind(this));
     document.addEventListener('fetch-all', this.fetchAll.bind(this));
     document.addEventListener('offer-redemption', this.redeemOffer.bind(this));
@@ -63,6 +65,11 @@
       asyncStorage.setItem('Telenor-analytics', JSON.stringify(previousEvents));
     });
   };
+
+  AdManager.prototype.handleAlarm = function (alarm) {
+    console.log('Handling alarm');
+    this.manageAds(this.currentAds);
+  }
 
   AdManager.prototype.loadFile = function (file, successCallback, errorCallback) {
     try {
@@ -330,6 +337,10 @@
   };
 
   AdManager.prototype.manageAds = function(apiData) {
+    if (!apiData) {
+      return;
+    }
+
     var self = this;
 
     //Handle sponsors
