@@ -68,7 +68,11 @@
 
   AdManager.prototype.handleAlarm = function (alarm) {
     console.log('Handling alarm');
-    this.manageAds(this.currentAds);
+    var currentData = {};
+    currentData.sponsors = [];
+    currentData.sponsors.push(this.currentSponsor);
+    currentData.advertisements = this.currentAds;
+    this.manageAds(currentData);
   }
 
   AdManager.prototype.loadFile = function (file, successCallback, errorCallback) {
@@ -344,6 +348,15 @@
     }
 
     var self = this;
+
+    var alarms = navigator.mozAlarms.getAll();
+    alarms.onsuccess = function(event) {
+      if (!event.target.result || event.target.result.length === 0) {
+        var alarmTime = new Date();
+        alarmTime.setHours(24, 0, 1, 0);
+        navigator.mozAlarms.add(alarmTime, 'ignoreTimezone', {});
+      }
+    }
 
     //Handle sponsors
     var sponsors = apiData.sponsors;
