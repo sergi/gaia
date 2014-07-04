@@ -391,8 +391,8 @@
             self.currentSponsor = currentSponsor;
             self.view.setSponsor(self.currentSponsor);
           });
-        });
-      }
+        }
+      });
     } else {
       self.view.removeSponsor();
     }
@@ -421,7 +421,7 @@
       var currentDate = new Date();
       for (var i = 0; i < advertisements.length; i++) {
         // Check if the ad contains an image.
-        if (advertisements[i].images) {
+        if (advertisements[i].images || advertisements[i].imagesData) {
           var adAvailability = advertisements[i].availability;
           // Check if the ad has a start and end date.
           if (adAvailability && adAvailability.start && adAvailability.end) {
@@ -451,8 +451,8 @@
             self.currentAds.push(currentAd);
             self.view.setAds(self.currentAds);
           });
-        });
-      }
+        }
+      });
     } else {
       self.view.setAds([]);
     }
