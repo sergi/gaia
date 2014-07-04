@@ -14,6 +14,8 @@
     this.pendingAuthTokenRequest = false;
     this.pendingNetworkRequests = {};
 
+    navigator.mozSetMessageHandler('alarm', this.handleAlarm.bind(this));
+
     document.addEventListener('ad-analytics', this.sendAnalytics.bind(this));
     document.addEventListener('fetch-all', this.fetchAll.bind(this));
     document.addEventListener('offer-redemption', this.redeemOffer.bind(this));
@@ -63,6 +65,11 @@
       asyncStorage.setItem('Telenor-analytics', JSON.stringify(previousEvents));
     });
   };
+
+  AdManager.prototype.handleAlarm = function (alarm) {
+    console.log('Handling alarm');
+    this.manageAds(this.currentAds);
+  }
 
   AdManager.prototype.loadFile = function (file, successCallback, errorCallback) {
     try {
@@ -332,6 +339,10 @@
   };
 
   AdManager.prototype.manageAds = function(apiData) {
+    if (!apiData) {
+      return;
+    }
+
     var self = this;
 
     //Handle sponsors
@@ -355,7 +366,7 @@
       var currentDate = new Date();
       for (var i = 0; i < sponsors.length; i++) {
         // Check if the sponsor contains an image.
-        if (sponsors[i].images) {
+        if (sponsors[i].images || sponsors[i].imagesData) {
           var sponsorAvailability = sponsors[i].availability;
           // Check if the sponsor has a start and end date.
           if (sponsorAvailability && sponsorAvailability.start && sponsorAvailability.end) {
@@ -371,12 +382,17 @@
 
       // the sponsors now have valid data, try loading the images and rendering them.
       validSponsors.forEach(function(currentSponsor) {
-        self.fetchImage(currentSponsor.images[0]).then(function(image) {
-          currentSponsor.imageData = image;
+        if (currentSponsor.imagesData) {
           self.currentSponsor = currentSponsor;
           self.view.setSponsor(self.currentSponsor);
+        } else {
+          self.fetchImage(currentSponsor.images[0]).then(function(image) {
+            currentSponsor.imagesData = image;
+            self.currentSponsor = currentSponsor;
+            self.view.setSponsor(self.currentSponsor);
+          });
         });
-      });
+      }
     } else {
       self.view.removeSponsor();
     }
@@ -421,17 +437,22 @@
 
       // the ads now have valid data, try loading the images and rendering them.
       validAds.forEach(function(currentAd) {
-        var imagePromises = [];
-        currentAd.images.forEach(function(image) {
-          imagePromises.push(self.fetchImage(image));
-        });
-
-        Promise.all(imagePromises).then(function (results) {
-          currentAd.imageData = results;
+        if (currentAd.imagesData) {
           self.currentAds.push(currentAd);
           self.view.setAds(self.currentAds);
+        } else {
+          var imagePromises = [];
+          currentAd.images.forEach(function(image) {
+            imagePromises.push(self.fetchImage(image));
+          });
+
+          Promise.all(imagePromises).then(function (results) {
+            currentAd.imagesData = results;
+            self.currentAds.push(currentAd);
+            self.view.setAds(self.currentAds);
+          });
         });
-      });
+      }
     } else {
       self.view.setAds([]);
     }
@@ -449,8 +470,7 @@
         self.manageAds(ads)
       } else {
         self.loadFile('js/preloadedads.json', function(preloadedAds) {
-            self.currentAds = preloadedAds.advertisements;
-            self.view.setAds(self.currentAds);
+            self.manageAds(preloadedAds)
           },
           function() {console.log('Error loading preloaded ads')});
       }
@@ -650,7 +670,7 @@
 
   AdView.prototype.setSponsor = function(sponsor) {
     this.domElement.classList.add('sponsored');
-    this.sponsorBanner.style.backgroundImage = 'url(' + sponsor.imageData + ')';
+    this.sponsorBanner.style.backgroundImage = 'url(' + sponsor.imagesData + ')';
     this.sponsorData = sponsor;
   }
 
@@ -792,7 +812,7 @@
     this.domElement.classList.add('card');
     this.domElement.classList.add(data.type);
 
-    this.image.src = data.imageData[0];
+    this.image.src = data.imagesData[0];
     this.content.textContent = data.descriptionText;
     this.buttonText.textContent = data.buttonText;
     this.action = data.action;
@@ -897,20 +917,20 @@
     if (data.type === 'offer') {
       var firstImage = document.createElement('div');
       firstImage.classList.add('firstImage');
-      firstImage.style.backgroundImage = 'url(' + data.imageData[0] + ')';
+      firstImage.style.backgroundImage = 'url(' + data.imagesData[0] + ')';
 
       this.summaryImage.style.backgroundImage = '';
       this.summaryImage.appendChild(firstImage);
 
-      if (data.imageData[1]) {
+      if (data.imagesData[1]) {
         var secondImage = document.createElement('div');
         secondImage.classList.add('secondImage');
-        secondImage.style.backgroundImage = 'url(' + data.imageData[1] + ')';
+        secondImage.style.backgroundImage = 'url(' + data.imagesData[1] + ')';
         this.summaryImage.appendChild(secondImage);
         this.summaryElement.classList.add('flippable');
       }
     } else {
-      this.summaryImage.style.backgroundImage = 'url(' + data.imageData[0] + ')';
+      this.summaryImage.style.backgroundImage = 'url(' + data.imagesData[0] + ')';
     }
 
     this.summaryContent.textContent = data.descriptionText;
