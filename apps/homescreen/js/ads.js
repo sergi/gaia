@@ -1,7 +1,10 @@
 'use strict';
 
-/*global GridManager MozActivity dump */
+/*global GridManager, MozActivity, asyncStorage, Promise, Notification,
+ LazyLoader, Event, getAdToken, Rest*/
 (function(exports) {
+
+  const TELENOR_ANALYTICS = 'Telenor-analytics';
 
   var AdManager = exports.AdManager = function(adView, telenorSims) {
     this.currentAds = [];
@@ -45,57 +48,53 @@
 
   AdManager.prototype.sendStoredAnalytics = function() {
     var self = this;
-    asyncStorage.getItem('Telenor-analytics', function(previousEvents) {
-    if (previousEvents) {
-      previousEvents = JSON.parse(previousEvents);
-      self.sendNetworkRequest('POST', self.analyticsUrl, previousEvents)
-        .then(function() {asyncStorage.removeItem('Telenor-analytics');});
+    asyncStorage.getItem(TELENOR_ANALYTICS, function(previousEvents) {
+      if (previousEvents) {
+        previousEvents = JSON.parse(previousEvents);
+        self.sendNetworkRequest('POST', self.analyticsUrl, previousEvents)
+          .then(function() {
+            asyncStorage.removeItem(TELENOR_ANALYTICS);
+          });
       }
     });
   };
 
   AdManager.prototype.storeAnalytics = function(event) {
-    asyncStorage.getItem('Telenor-analytics', function(previousEvents) {
+    asyncStorage.getItem(TELENOR_ANALYTICS, function(previousEvents) {
       if (previousEvents) {
         previousEvents = JSON.parse(previousEvents);
         previousEvents.push(event[0]);
       } else {
         previousEvents = event;
       }
-      asyncStorage.setItem('Telenor-analytics', JSON.stringify(previousEvents));
+      asyncStorage.setItem(TELENOR_ANALYTICS,
+        JSON.stringify(previousEvents));
     });
   };
 
-  AdManager.prototype.handleAlarm = function (alarm) {
+  AdManager.prototype.handleAlarm = function(alarm) {
     console.log('Handling alarm');
-    var currentData = {};
-    currentData.sponsors = [];
-    currentData.sponsors.push(this.currentSponsor);
-    currentData.advertisements = this.currentAds;
-    this.manageAds(currentData);
-  }
+    this.manageAds({
+      sponsors: [this.currentSponsor],
+      advertisements: this.currentAds
+    });
+  };
 
-  AdManager.prototype.loadFile = function (file, successCallback, errorCallback) {
-    try {
-      var xhr = new XMLHttpRequest();
-      xhr.overrideMimeType('application/json');
-      xhr.open('GET', file, true);
-      xhr.send(null);
+  AdManager.prototype.loadFile =
+    function(file, successCallback, errorCallback) {
+    errorCallback = errorCallback || function() {};
 
-      xhr.onload = function (event) {
+    Rest.get(file, {
+      success: function(response) {
         try {
-          successCallback(JSON.parse(xhr.responseText));
+          successCallback(JSON.parse(response));
         } catch (e) {
-          errorCallback && errorCallback(e);
+          errorCallback(e);
         }
-      };
-
-      xhr.onerror = function _xhrOnError(evt) {
-        errorCallback && errorCallback('file not found');
-      };
-    } catch (ex) {
-      errorCallback && errorCallback(ex);
-    }
+      },
+      error: errorCallback
+    },
+    { overrideMimeType: 'application/json' });
   };
 
   AdManager.prototype.sendNetworkRequest = function(type, url, data) {
@@ -121,28 +120,36 @@
               url: self.identifyUrl,
               forceCellNetworkForAuthorize: self.forceCellNetworkForAuthorize
             };
-            getAdToken(tokenSettings, function(err, token) {
-              if (err || !token) {
-                console.error('Error fetching access token: ' + JSON.stringify(err));
 
-                // if we didn't manage to get a token, error out all pending requests
-                for (var requestId in self.pendingNetworkRequests) {
+            getAdToken(tokenSettings, function(err, token) {
+              var ids = Object.keys(self.pendingNetworkRequests);
+              if (err || !token) {
+                console.error('Error fetching access token: ' +
+                              JSON.stringify(err));
+
+                // if we didn't manage to get a token, error out all pending
+                // requests.
+                ids.forEach(function(requestId) {
                   var requests = self.pendingNetworkRequests[requestId];
                   requests.forEach(function(request) {
                     request.error(request.data);
                   });
-                }
+                });
               } else {
                 self.authToken = token;
 
-                // if we managed to get a token, send off all of the requests and call the right callbacks
-                for (var requestId in self.pendingNetworkRequests) {
+                // if we managed to get a token, send off all of the requests
+                // and call the right callbacks
+                ids.forEach(function(requestId) {
                   var requests = self.pendingNetworkRequests[requestId];
                   requests.forEach(function(request) {
-                    // FIXME: maybe blindly recursing isn't that smart...perhaps we need a max retry count or something?
-                    self.sendNetworkRequest(request.type, request.url, request.data).then(request.success, request.error);
+                    // FIXME: maybe blindly recursing isn't that smart...
+                    // perhaps we need a max retry count or something?
+                    self.sendNetworkRequest(
+                      request.type, request.url, request.data)
+                    .then(request.success, request.error);
                   });
-                }
+                });
               }
 
               self.pendingAuthTokenRequest = false;
@@ -150,12 +157,23 @@
             });
           }
 
-          // queue up our request so that it will be retried once we have a auth token
+          // queue up our request so that it will be retried once we have a
+          // auth token
           var requestIdentifier = type + ':' + url;
-          self.pendingNetworkRequests[requestIdentifier] = self.pendingNetworkRequests[requestIdentifier] || [];
-          if (!(type === 'GET' && self.pendingNetworkRequests[requestIdentifier].length)) {
-            console.log('Request to ' + url + '(' + type + ') queued for trying after auth token is fetched');
-            self.pendingNetworkRequests[requestIdentifier].push({ type: type, url: url, data: data, success: resolve, error: reject });
+          self.pendingNetworkRequests[requestIdentifier] =
+            self.pendingNetworkRequests[requestIdentifier] || [];
+
+          if (!(type === 'GET' &&
+                self.pendingNetworkRequests[requestIdentifier].length)) {
+            console.log('Request to ' + url + '(' + type +
+                        ') queued for trying after auth token is fetched');
+            self.pendingNetworkRequests[requestIdentifier].push({
+              type: type,
+              url: url,
+              data: data,
+              success: resolve,
+              error: reject
+            });
           } else {
             reject(data);
           }
@@ -170,7 +188,7 @@
 
       req.ontimeout = function() {
         reject(data);
-      }
+      };
 
       if (type === 'POST') {
         req.setRequestHeader('Content-Type', 'application/json');
@@ -188,7 +206,8 @@
         if (response.offerSuccessText) {
           notificationContent.body = response.offerSuccessText;
         } else {
-          notificationContent.body = 'You have successfully activated an offer.';
+          notificationContent.body =
+            'You have successfully activated an offer.';
         }
         var redeemNotification = new Notification('GP', {
           body: notificationContent.body
@@ -206,16 +225,24 @@
     var action = event.detail.action;
     switch (action.type) {
       case 'url':
-        new MozActivity({name: 'view', data: {type: 'url', url: action.url}});
+        new MozActivity({
+          name: 'view',
+          data: {
+            type: 'url',
+            url: action.url
+          }
+        });
         self.sendOfferClaimRequest(action.activationUrl);
         break;
       case 'sms':
         if (navigator.mozMobileMessage) {
-          var offerSMS = navigator.mozMobileMessage.send(action.phoneNumber, action.smsMessage);
+          var offerSMS = navigator.mozMobileMessage.send(
+            action.phoneNumber, action.smsMessage);
+
           offerSMS.onsuccess = function() {
             self.sendOfferClaimRequest(action.activationUrl);
           };
-        };
+        }
         break;
       case 'provision':
         self.sendOfferClaimRequest(action.activationUrl);
@@ -233,9 +260,8 @@
   };
 
   AdManager.prototype.fetchAds = function(isRetryRequest) {
-
     var self = this;
-    this.sendNetworkRequest('GET', this.adsUrl).then(function (response) {
+    this.sendNetworkRequest('GET', this.adsUrl).then(function(response) {
       self.adsInitialized = true;
       self.pollingForAds = false;
 
@@ -244,15 +270,16 @@
 
       if (!self.fetchAdsInterval) {
         // Try fetching ads every 6 hours.
-        self.fetchAdsInterval = window.setInterval(self.fetchAds.bind(self), 6 * 60 * 60 * 1000);
+        self.fetchAdsInterval =
+          window.setInterval(self.fetchAds.bind(self), 6 * 60 * 60 * 1000);
       }
     }, function(error) {
       console.error('Error fetching ads: ' + JSON.stringify(error));
 
       // if we've already successfully fetched ads before, this is just a
       // "normal" error, so we can bail out. If we're already doing the retry
-      // polling and this isn't a retry request, there's no point in polling again, 
-      // so bail out.
+      // polling and this isn't a retry request, there's no point in polling
+      // again, so bail out.
       if (self.adsInitialized || (self.pollingForAds && !isRetryRequest)) {
         console.log('Received an error fetching ads, but not starting polling');
         return;
@@ -275,7 +302,7 @@
 
   AdManager.prototype.fetchPoints = function(isRetryRequest) {
     var self = this;
-    this.sendNetworkRequest('GET', this.pointsUrl).then(function (response) {
+    this.sendNetworkRequest('GET', this.pointsUrl).then(function(response) {
       self.pointsInitialized = true;
       self.pollingForPoints = false;
 
@@ -284,17 +311,19 @@
 
       if (!self.fetchPointsInterval) {
         // Try fetching points every 8 hours.
-        self.fetchPointsInterval = window.setInterval(self.fetchPoints.bind(self), 8 * 60 * 60 * 1000);
+        self.fetchPointsInterval =
+          window.setInterval(self.fetchPoints.bind(self), 8 * 60 * 60 * 1000);
       }
     }, function(error) {
       console.error('Error fetching points: ' + JSON.stringify(error));
 
       // if we've already successfully fetched points before, this is just a
       // "normal" error, so we can bail out. If we're already doing the retry
-      // polling and this isn't a retry request, there's no point in polling again, 
-      // so bail out.
-      if (self.pointsInitialized || (self.pollingForPoints && !isRetryRequest)) {
-        console.log('Received an error fetching points, but not starting polling');
+      // polling and this isn't a retry request, there's no point in polling
+      // again, so bail out.
+      if (self.pointsInitialized ||
+          (self.pollingForPoints && !isRetryRequest)) {
+        console.log('Received error fetching points, not starting polling');
         return;
       }
 
@@ -327,7 +356,8 @@
         if (imageData) {
           resolve(imageData);
         } else {
-          self.sendNetworkRequest('GET', self.apiPrefix + imageUrl + '/base64').then(
+          self.sendNetworkRequest(
+            'GET', self.apiPrefix + imageUrl + '/base64').then(
             function(response) {
               asyncStorage.setItem(imageUrl, response, function() {
                 resolve(response);
@@ -347,6 +377,7 @@
       return;
     }
 
+    var i;
     var self = this;
 
     var alarms = navigator.mozAlarms.getAll();
@@ -356,13 +387,15 @@
         alarmTime.setHours(24, 0, 1, 0);
         navigator.mozAlarms.add(alarmTime, 'ignoreTimezone', {});
       }
-    }
+    };
 
     //Handle sponsors
+    var lookup;
     var sponsors = apiData.sponsors;
     if (this.currentSponsor) {
-      var lookup = {};
-      for (var i = 0, len = sponsors.length; i < len; i++) {
+      lookup = {};
+      var sponsorsLen = sponsors.length;
+      for (i = 0; i < sponsorsLen; i++) {
         lookup[sponsors[i].id] = sponsors[i];
       }
       if (!lookup[this.currentSponsor.id]) {
@@ -373,18 +406,20 @@
     // Reset the current sponsor.
     this.currentSponsor = [];
 
+    var currentDate, startDate, endDate;
     // Make sure the sponsors are valid in this function.
     if (sponsors.length > 0) {
       var validSponsors = [];
-      var currentDate = new Date();
-      for (var i = 0; i < sponsors.length; i++) {
+      currentDate = new Date();
+      for (i = 0; i < sponsors.length; i++) {
         // Check if the sponsor contains an image.
         if (sponsors[i].images || sponsors[i].imagesData) {
           var sponsorAvailability = sponsors[i].availability;
           // Check if the sponsor has a start and end date.
-          if (sponsorAvailability && sponsorAvailability.start && sponsorAvailability.end) {
-            var startDate = new Date(sponsorAvailability.start);
-            var endDate = new Date(sponsorAvailability.end);
+          if (sponsorAvailability && sponsorAvailability.start &&
+              sponsorAvailability.end) {
+            startDate = new Date(sponsorAvailability.start);
+            endDate = new Date(sponsorAvailability.end);
             // Compare the date of the sponsor with the current time.
             if (currentDate > startDate && currentDate < endDate) {
               validSponsors.push(sponsors[i]);
@@ -393,7 +428,8 @@
         }
       }
 
-      // the sponsors now have valid data, try loading the images and rendering them.
+      // The sponsors now have valid data, try loading the images and
+      // rendering them.
       validSponsors.forEach(function(currentSponsor) {
         if (currentSponsor.imagesData) {
           self.currentSponsor = currentSponsor;
@@ -414,11 +450,12 @@
     //Handle advertisements
     var advertisements = apiData.advertisements;
     if (this.currentAds && this.currentAds.length > 0) {
-      var lookup = {};
-      for (var i = 0, len = advertisements.length; i < len; i++) {
+      lookup = {};
+      var adsLen = advertisements.length;
+      for (i = 0; i < adsLen; i++) {
         lookup[advertisements[i].id] = advertisements[i];
       }
-      for (var i = 0; i < this.currentAds.length; i++) {
+      for (i = 0; i < this.currentAds.length; i++) {
         if (!lookup[this.currentAds[i].id]) {
           this.removeDBItem(this.currentAds[i].id);
         }
@@ -431,15 +468,15 @@
     // Make sure the ads are valid in this function.
     if (advertisements.length > 0) {
       var validAds = [];
-      var currentDate = new Date();
-      for (var i = 0; i < advertisements.length; i++) {
+      currentDate = new Date();
+      for (i = 0; i < advertisements.length; i++) {
         // Check if the ad contains an image.
         if (advertisements[i].images || advertisements[i].imagesData) {
           var adAvailability = advertisements[i].availability;
           // Check if the ad has a start and end date.
           if (adAvailability && adAvailability.start && adAvailability.end) {
-            var startDate = new Date(adAvailability.start);
-            var endDate = new Date(adAvailability.end);
+            startDate = new Date(adAvailability.start);
+            endDate = new Date(adAvailability.end);
             // Compare the date of the ad with the current time.
             if (currentDate > startDate && currentDate < endDate) {
               validAds.push(advertisements[i]);
@@ -459,7 +496,7 @@
             imagePromises.push(self.fetchImage(image));
           });
 
-          Promise.all(imagePromises).then(function (results) {
+          Promise.all(imagePromises).then(function(results) {
             currentAd.imagesData = results;
             self.currentAds.push(currentAd);
             self.view.setAds(self.currentAds);
@@ -473,25 +510,26 @@
 
   AdManager.prototype.managePoints = function(apiData) {
     this.view.setPoints(apiData);
-  }
+  };
 
   AdManager.prototype.setupSystem = function() {
     var self = this;
-    // Load all ads from the database on phone boot, if there are none, load the json file.
+    // Load all ads from the database on phone boot, if there are none, load
+    // the json file.
     asyncStorage.getItem('Telenor-ads', function(ads) {
       if (ads) {
-        self.manageAds(ads)
+        self.manageAds(ads);
       } else {
         self.loadFile('js/preloadedads.json', function(preloadedAds) {
-            self.manageAds(preloadedAds)
+            self.manageAds(preloadedAds);
           },
-          function() {console.log('Error loading preloaded ads')});
+          function() { console.log('Error loading preloaded ads'); });
       }
     });
 
     asyncStorage.getItem('Telenor-points', function(points) {
       if (points) {
-        self.managePoints(points)
+        self.managePoints(points);
       }
     });
 
@@ -504,7 +542,8 @@
           self.setApiPrefix(url);
         }
         var forceCellNetworkLock = navigator.mozSettings.createLock();
-        var forceCellNetwork = forceCellNetworkLock.get('ads.forceCellNetwork.disabled');
+        var forceCellNetwork = forceCellNetworkLock.get(
+          'ads.forceCellNetwork.disabled');
         forceCellNetwork.onsuccess = function() {
           if (forceCellNetwork.result['ads.forceCellNetwork.disabled']) {
             self.forceCellNetworkForAuthorize = false;
@@ -527,12 +566,12 @@
       asyncStorage.getItem(lookup[adId].image, function(image) {
         if (image) {
           asyncStorage.removeItem(lookup[adId].image);
-        };
+        }
       });
     }
   };
 
-  var AdView = exports.AdView =  function(gridManager) {
+  var AdView = exports.AdView = function(gridManager) {
     var self = this;
     this.summaryContainer = document.createElement('div');
     this.summaryContainer.id = 'summaryContainer';
@@ -545,14 +584,24 @@
       if (self.sponsorData) {
         var eventData = [];
         var sponsor = {};
-        sponsor.id = self.sponsorData.id
-        eventData.push({'sponsor': sponsor, 'timestamp': new Date().toISOString(), type: 'click'});
+        sponsor.id = self.sponsorData.id;
+        eventData.push({
+          'sponsor': sponsor,
+          'timestamp': new Date().toISOString(),
+          'type': 'click'
+        });
         var event = new CustomEvent('ad-analytics', {'detail': eventData});
         document.dispatchEvent(event);
 
-        new MozActivity({name: 'view', data: {type: 'url', url: self.sponsorData.url}});
+        new MozActivity({
+          name: 'view',
+          data: {
+            type: 'url',
+            url: self.sponsorData.url
+          }
+        });
       }
-    })
+    });
 
     this.cardsList = [];
     this.dataStore = null;
@@ -583,7 +632,7 @@
     });
 
     var startEvent, currentX, currentY, startX, startY, dx, dy,
-        detecting = false, swiping = false, scrolling = false
+        detecting = false, swiping = false, scrolling = false;
 
     this.domElement.addEventListener('gridpageshowend', function(e) {
         document.querySelector('#footer').style.transform = 'translateY(100%)';
@@ -649,50 +698,54 @@
   };
 
   AdView.prototype.flipCards = function() {
-    var flippableOffers = document.querySelectorAll('#summaryContainer .offer .summaryImage.flippable');
-    for(var i = 0; i < flippableOffers.length; i++) {
+    var flippableOffers = document.querySelectorAll(
+      '#summaryContainer .offer .summaryImage.flippable');
+
+    for (var i = 0; i < flippableOffers.length; i++) {
       flippableOffers[i].classList.toggle('flipped');
-    };
+    }
   };
 
   AdView.prototype.setAds = function(adsData) {
     var ads = adsData;
     var currentCards = document.querySelectorAll('#summaryContainer > .card');
     var cardCount = currentCards.length;
-    for (var i = ads.length; i < cardCount; i++) {
+    var card, i;
+    for (i = ads.length; i < cardCount; i++) {
       // Remove some excess cards.
-      var card = this.cardsList.pop();
+      card = this.cardsList.pop();
       card.ad.summaryElement.parentNode.removeChild(card.ad.summaryElement);
     }
-    for (var i = cardCount; i < ads.length; i++) {
+
+    for (i = cardCount; i < ads.length; i++) {
       // Add some extra cards.
-      var card = {};
-      card.ad = new Ad(i);
+      card = { ad: new Ad(i) };
       this.cardsList.push(card);
       this.summaryContainer.appendChild(card.ad.summaryElement);
     }
 
-    for (var i = 0; i < ads.length; i++) {
+    for (i = 0; i < ads.length; i++) {
       this.cardsList[i].ad.setData(ads[i]);
     }
   };
 
   AdView.prototype.setPoints = function(pointsData) {
     this.operatorCard.setPoints(pointsData.points);
-  }
+  };
 
   AdView.prototype.setSponsor = function(sponsor) {
     this.domElement.classList.add('sponsored');
-    this.sponsorBanner.style.backgroundImage = 'url(' + sponsor.imagesData + ')';
+    this.sponsorBanner.style.backgroundImage =
+      'url(' + sponsor.imagesData + ')';
     this.sponsorData = sponsor;
-  }
+  };
 
   AdView.prototype.removeSponsor = function() {
     this.domElement.classList.remove('sponsored');
-  }
+  };
 
   AdView.prototype.openDetails = function(card) {
-    this.currentCard = card-0;
+    this.currentCard = card - 0;
     var currentCardData = this.cardsList[this.currentCard].ad.cardData;
     this.detailedCard.setData(currentCardData);
 
@@ -702,9 +755,12 @@
     this.detailsVisible = true;
 
     var eventData = [];
-    var card = {};
-    card.id = currentCardData.id
-    eventData.push({'card': card, 'timestamp': new Date().toISOString(), type: 'view'});
+    card = { id : currentCardData.id };
+    eventData.push({
+      'card': card,
+      'timestamp': new Date().toISOString(),
+      'type': 'view'
+    });
     var event = new CustomEvent('ad-analytics', {'detail': eventData});
     document.dispatchEvent(event);
   };
@@ -782,9 +838,15 @@
   DetailedCard.prototype.activate = function() {
     var data = this.cardData;
     if (data.type !== 'offer') {
-      switch(data.action.type) {
+      switch (data.action.type) {
         case 'url':
-          new MozActivity({name: 'view', data: {type: 'url', url: data.action.url}});
+          new MozActivity({
+            name: 'view',
+            data: {
+              type: 'url',
+              url: data.action.url
+            }
+          });
           break;
         case 'call':
           new MozActivity({name: 'dial', data: {type: 'webtelephony/number',
@@ -804,19 +866,27 @@
   DetailedCard.prototype.redeem = function() {
     this.sendClickAnalytics();
     this.redeemContainer.style.visibility = 'hidden';
-    var event = new CustomEvent('offer-redemption', { detail: { action: this.cardData.action }});
+    var event = new CustomEvent('offer-redemption', {
+      detail: {
+        action: this.cardData.action
+      }
+    });
     document.dispatchEvent(event);
-  }
+  };
 
   DetailedCard.prototype.sendClickAnalytics = function() {
     var data = this.cardData;
     var eventData = [];
     var card = {};
-    card.id = data.id
-    eventData.push({'card': card, 'timestamp': new Date().toISOString(), type: 'click'});
+    card.id = data.id;
+    eventData.push({
+      'card': card,
+      'timestamp': new Date().toISOString(),
+      type: 'click'
+    });
     var event = new CustomEvent('ad-analytics', {'detail': eventData});
     document.dispatchEvent(event);
-  }
+  };
 
   DetailedCard.prototype.setData = function(data) {
     this.cardData = data;
@@ -838,11 +908,12 @@
     if (data.offerConfirmationText) {
       this.redeemConfirmText.textContent = data.offerConfirmationText;
     } else {
-      this.redeemConfirmText.textContent
-        = 'Click Confirm to activate this offer. You will receive an SMS reply upon activation';
+      this.redeemConfirmText.textContent =
+        'Click Confirm to activate this offer. ' +
+        'You will receive an SMS reply upon activation';
     }
     this.redeemContainer.style.visibility = 'hidden';
-  }
+  };
 
   var OperatorCard = function() {
     var self = this;
@@ -861,20 +932,26 @@
     });
     this.infoElement.addEventListener('touchend', function() {
       self.infoElement.classList.remove('clicked');
-   
+
       var eventData = [];
       eventData.push({'timestamp': new Date().toISOString(), type: 'info'});
       var event = new CustomEvent('ad-analytics', {'detail': eventData});
       document.dispatchEvent(event);
 
-      new MozActivity({name: 'view', data: {type: 'url', url: 'http://www.grameenphone.com'}});
+      new MozActivity({
+        name: 'view',
+        data: {
+          type: 'url',
+          url: 'http://www.grameenphone.com'
+        }
+      });
     });
 
     if (navigator.mozSettings) {
       var hasRefreshLock = navigator.mozSettings.createLock();
       var hasRefresh = hasRefreshLock.get('ads.refreshButton.enabled');
         hasRefresh.onsuccess = (function() {
-          if (hasRefresh.result['ads.refreshButton.enabled']) { 
+          if (hasRefresh.result['ads.refreshButton.enabled']) {
             self.fetchIcon = document.createElement('p');
             self.fetchIcon.classList.add('fetchIcon');
             self.fetchIcon.textContent = '↻';
@@ -888,15 +965,13 @@
     }
     this.domElement.appendChild(this.pointsElement);
     this.domElement.appendChild(this.infoElement);
-  }
+  };
 
   OperatorCard.prototype.setPoints = function(points) {
     this.pointsElement.textContent = points;
-  }
+  };
 
   function Ad(cardIndex) {
-    var self = this;
-
     this.summaryElement = document.createElement('div');
     this.summaryElement.classList.add('card');
     this.summaryElement.dataset.cardIndex = cardIndex;
@@ -943,14 +1018,15 @@
         this.summaryElement.classList.add('flippable');
       }
     } else {
-      this.summaryImage.style.backgroundImage = 'url(' + data.imagesData[0] + ')';
+      this.summaryImage.style.backgroundImage =
+        'url(' + data.imagesData[0] + ')';
     }
 
     this.summaryContent.textContent = data.descriptionText;
     this.summaryProvider.textContent = data.provider;
   };
 
-  var AdUtils = exports.AdUtils = function (){};
+  var AdUtils = exports.AdUtils = function() {};
 
   AdUtils.findTelenorSims = function() {
     var ICCs = navigator.mozIccManager.iccIds;
@@ -958,8 +1034,8 @@
     for (var i = 0; i < ICCs.length; i++) {
       var iccData = navigator.mozIccManager.getIccById(ICCs[i]);
       if (iccData && iccData.cardState === 'ready') {
-        if ((iccData.iccInfo.mcc === '242' || iccData.iccInfo.mcc === '470')
-            && iccData.iccInfo.mnc === '01') {
+        if ((iccData.iccInfo.mcc === '242' || iccData.iccInfo.mcc === '470') &&
+            iccData.iccInfo.mnc === '01') {
           var simData = {};
           simData.slot = i;
           simData.iccData = iccData;
@@ -989,27 +1065,30 @@
         GridManager.goToPage(AdView ? 1 : 0);
       };
     }
-  }
+  };
 
   document.addEventListener('homescreen-ready', function(e) {
     var telenorSims = AdUtils.findTelenorSims();
     if (telenorSims) {
       AdUtils.initializeSystem(telenorSims);
-    } else {
-      var ICCs = navigator.mozIccManager.iccIds;
-      for (var i = 0; i < ICCs.length; i++) {
-        navigator.mozIccManager.getIccById(ICCs[i]).oniccinfochange = function(icc) {
-          if (icc.target.cardState === 'ready') {
-            telenorSims = AdUtils.findTelenorSims();
-            if (telenorSims) {
-              AdUtils.initializeSystem(telenorSims);
-            } else {
-              navigator.mozIccManager.getIccById(icc.target.iccInfo.iccid)
-                .oniccinfochange = null;
-            }
+      return;
+    }
+
+    var ICCs = navigator.mozIccManager.iccIds;
+    for (var i = 0; i < ICCs.length; i++) {
+      navigator.mozIccManager.getIccById(ICCs[i]).oniccinfochange =
+        function(icc) {
+          if (icc.target.cardState !== 'ready') {
+            return;
           }
-        };
-      }
+          telenorSims = AdUtils.findTelenorSims();
+          if (telenorSims) {
+            AdUtils.initializeSystem(telenorSims);
+          } else {
+            navigator.mozIccManager.getIccById(icc.target.iccInfo.iccid)
+              .oniccinfochange = null;
+          }
+      };
     }
   }, false);
 
