@@ -92,37 +92,71 @@ function SimPinDialog(dialog) {
     }
   }
 
-  // card lock error messages
-  function handleCardLockError(lockType, retryCount) {
-    // expected: 'pin', 'fdn', 'puk'
-    if (!lockType) {
-      skip();
+  /**
+   * Tells users how many remaining attempts for submitting their password are
+   * left, and focuses on the right input element depending on the lockType.
+   *
+   * @param {string} lockType e.g. 'pin', 'puk', 'fdn' etc.
+   * @param {number} count Amount of retries left.
+   */
+  function _handleRetryPassword(lockType, count) {
+    if (count <= 0 || typeof count !== 'number') {
+      console.warning('Called _handleRetryPassword with incorrect count ' +
+                      'argument');
       return;
     }
 
-    // after three strikes, ask for PUK/PUK2
-    if (retryCount <= 0) {
-      if (lockType === 'pin') {
-        // we leave this for system app
-        skip();
-      } else if (lockType === 'fdn' || lockType === 'pin2') {
-        _action = initUI('unlock_puk2');
-        pukInput.focus();
-      } else { // out of PUK/PUK2: we're doomed
-        // TODO: Shouldn't we show some kind of message here?
-        skip();
-      }
-      return;
-    }
-
-    var msgId = (retryCount > 1) ? 'AttemptMsg3' : 'LastChanceMsg';
-    showMessage(lockType + 'ErrorMsg', lockType + msgId, { n: retryCount });
+    var msgId = count > 1 ? 'AttemptMsg3' : 'LastChanceMsg';
+    showMessage(lockType + 'ErrorMsg', lockType + msgId, { n: count });
     showRetryCount(count);
 
     if (lockType === 'pin' || lockType === 'fdn') {
       pinInput.focus();
     } else if (lockType === 'puk') {
       pukInput.focus();
+    }
+  }
+
+  /**
+   * Handles errors that happened when trying to lock or unlock the SIM
+   * Card. The potential errors are defined in `ril_consts.js`.
+   *
+   * @param {object} lockError - IccCardLockError error object
+   */
+  function handleCardLockError(error) {
+    var name = error.name;
+    var count = error.retryCount;
+    var lockType = error.lockType;
+
+    if (!lockType) {
+      console.error('`handleCardLockError` called without a lockType. ' +
+                    'This should never even happen.', error);
+      skip();
+      return;
+    }
+
+    switch (name) {
+      case 'SimPuk2':
+        _action = initUI('unlock_puk2');
+        pukInput.focus();
+        break;
+      case 'IncorrectPassword':
+        if (count > 0) {
+          _handleRetryPassword(lockType, count);
+        } else {
+          _action = initUI('unlock_puk');
+          pukInput.focus();
+        }
+        break;
+      default:
+        if (lockType === 'fdn' && typeof count === 'undefined') {
+          showMessage('fdnNotSupported');
+        } else {
+          showMessage('genericLockError');
+          console.error('Error of type ' + name + ' happened coming from an ' +
+                        'IccCardLockError event', error);
+        }
+        skip();
     }
   }
 
@@ -164,7 +198,10 @@ function SimPinDialog(dialog) {
       _onsuccess();
     };
     req.onerror = function sp_unlockError() {
-      handleCardLockError(options.lockType, req.error.retryCount);
+      var error = req.error;
+      error.lockType = options.lockType;
+
+      handleCardLockError(error);
     };
   }
 
@@ -216,7 +253,10 @@ function SimPinDialog(dialog) {
       _onsuccess();
     };
     req.onerror = function sp_enableError() {
-      handleCardLockError(options.lockType, req.error.retryCount);
+      var error = req.error;
+      error.lockType = options.lockType;
+
+      handleCardLockError(error);
     };
   }
 
@@ -349,11 +389,9 @@ function SimPinDialog(dialog) {
     return false;
   }
 
-
   /**
-   * Expose a main `show()' method
+   * Expose a main `show()` method
    */
-
   function initUI(action) {
     showMessage();
     showRetryCount(); // Clear the retry count at first
@@ -383,7 +421,7 @@ function SimPinDialog(dialog) {
       case 'unlock_puk2':
         lockType = 'puk2';
         setInputMode('puk');
-        showMessage('simCardLockedMsg', 'enterPuk2Msg');
+        showMessage('simCardLockedMsg', 'enterPuk3Msg');
         _localize(dialogTitle, 'puk2Title');
         break;
 
@@ -422,7 +460,7 @@ function SimPinDialog(dialog) {
     }
 
     // display the number of remaining retries if necessary
-    // XXX this only works with the emulator (and some commercial RIL stacks...)
+    // XXX this only works with emulator (and some commercial RIL stacks...)
     // https://bugzilla.mozilla.org/show_bug.cgi?id=905173
     var req = icc.getCardLockRetryCount(lockType);
     req.onsuccess = function() {
@@ -439,17 +477,14 @@ function SimPinDialog(dialog) {
   function show(action, options) {
     options = options || {};
 
-    icc = getIccByIndex(options.cardIndex);
-    if (!icc) {
-      return;
-    }
-
     var dialogPanel = '#' + dialog.id;
-    if (dialogPanel == Settings.currentPanel) {
+    icc = getIccByIndex(options.cardIndex);
+    _action = initUI(action);
+
+    if (!icc || dialogPanel === Settings.currentPanel) {
       return;
     }
 
-    _action = initUI(action);
     if (!_action) {
       skip();
       return;
@@ -458,10 +493,13 @@ function SimPinDialog(dialog) {
     _origin = options.exitPanel || Settings.currentPanel;
     Settings.currentPanel = dialogPanel;
 
-    _onsuccess = (typeof options.onsuccess === 'function') ?
-        options.onsuccess : function() {};
-    _oncancel = (typeof options.oncancel === 'function') ?
-        options.oncancel : function() {};
+
+     if (typeof options.onsuccess === 'function') {
+       _onsuccess = options.onsuccess;
+     }
+     if (typeof options.oncancel === 'function') {
+       _oncancel = options.oncancel;
+     }
     _fdnContactInfo = options.fdnContact;
 
     window.addEventListener('panelready', function inputFocus() {
