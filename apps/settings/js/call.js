@@ -793,11 +793,10 @@ require([
      *
      */
     function cs_updateCallWaitingItemState(callback) {
+      callback = callback || function(){};
       var menuItem = document.getElementById('menuItem-callWaiting');
       if (!menuItem || menuItem.hidden) {
-        if (typeof callback === 'function') {
-          callback(null);
-        }
+        callback();
         return;
       }
 
@@ -808,29 +807,21 @@ require([
         getCWEnabled.onsuccess = function cs_getCWEnabledSuccess() {
           var enabled = getCWEnabled.result;
           input.checked = enabled;
-          if (enabled) {
-            menuItem.dataset.state = 'on';
-          } else {
-            menuItem.dataset.state = 'off';
-          }
-          if (callback) {
-            callback(null);
-          }
+          menuItem.dataset.state = enabled ? 'on' : 'off';
+
+          callback();
           done();
         };
-        getCWEnabled.onerror = function cs_getCWEnabledError() {
+
+        getCWEnabled.onerror = function cs_getCWEnabledError(e) {
+          console.log('asdasd', arguments);
           menuItem.dataset.state = 'unknown';
-          if (callback) {
-            callback(null);
-          }
+          callback();
           done();
         };
       });
     }
 
-    /**
-     *
-     */
     function cs_initCallWaiting() {
       var alertPanel =
         document.querySelector('#call .cw-alert');
@@ -839,21 +830,29 @@ require([
       var setBtn = alertPanel.querySelector('.cw-alert-set');
       var cancelBtn = alertPanel.querySelector('.cw-alert-cancel');
 
+      function updateCWStateCallback() {
+        cs_enableTabOnCallerIdItem(true);
+        cs_enableTabOnCallWaitingItem(true);
+        // Keep the state of call forwarding items.
+        cs_enableTapOnCallForwardingItems(_getCallForwardingOptionSuccess);
+      }
+
+      function disableTabOnCallItemsCallback() {
+        cs_enableTabOnCallerIdItem(false);
+        cs_enableTabOnCallWaitingItem(false);
+        cs_enableTapOnCallForwardingItems(false);
+      }
+
       alertLabel.addEventListener('click', cs_callWaitingItemListener);
 
       setBtn.addEventListener('click', function cs_alertSetClicked(event) {
         var handleSetCallWaiting = function cs_handleSetCallWaiting() {
-          cs_updateCallWaitingItemState(function() {
-            cs_enableTabOnCallerIdItem(true);
-            cs_enableTabOnCallWaitingItem(true);
-            // Keep the state of call forwarding items.
-            cs_enableTapOnCallForwardingItems(_getCallForwardingOptionSuccess);
-          });
+          cs_updateCallWaitingItemState(updateCWStateCallback);
           alertPanel.hidden = true;
         };
-        cs_enableTabOnCallerIdItem(false);
-        cs_enableTabOnCallWaitingItem(false);
-        cs_enableTapOnCallForwardingItems(false);
+
+        disableTabOnCallItemsCallback();
+
         var confirmInput =
           alertPanel.querySelector('.cw-alert-checkbox-label input');
         var req = _mobileConnection.setCallWaitingOption(confirmInput.checked);
@@ -870,16 +869,11 @@ require([
         document.querySelector('#menuItem-callWaiting .checkbox-label input');
       input.addEventListener('change', function cs_cwInputChanged(event) {
         var handleSetCallWaiting = function cs_handleSetCallWaiting() {
-          cs_updateCallWaitingItemState(function() {
-            cs_enableTabOnCallerIdItem(true);
-            cs_enableTabOnCallWaitingItem(true);
-            // Keep the state of call forwarding items.
-            cs_enableTapOnCallForwardingItems(_getCallForwardingOptionSuccess);
-          });
+          cs_updateCallWaitingItemState(updateCWStateCallback);
         };
-        cs_enableTabOnCallerIdItem(false);
-        cs_enableTabOnCallWaitingItem(false);
-        cs_enableTapOnCallForwardingItems(false);
+
+        disableTabOnCallItemsCallback();
+
         var req = _mobileConnection.setCallWaitingOption(input.checked);
         req.onsuccess = req.onerror = handleSetCallWaiting;
       });
