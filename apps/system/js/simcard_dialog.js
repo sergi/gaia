@@ -71,13 +71,8 @@ var SimPinDialog = {
     });
 
     function checkDialogDone() {
-      if (inputField.value.length >= 4) {
-        self.dialogDone.disabled = false;
-      } else {
-        self.dialogDone.disabled = true;
-      }
+      self.dialogDone.disabled = inputField.value.length < 4;
     }
-
 
     return inputField;
   },
@@ -103,6 +98,7 @@ var SimPinDialog = {
         this.triesLeftMsg.hidden = false;
       }
     }).bind(this);
+
     request.onerror = function() {
       console.error('Could not fetch CardLockRetryCount', request.error.name);
     };

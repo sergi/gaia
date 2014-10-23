@@ -29,6 +29,8 @@ function SimPinDialog(dialog) {
     'puk2': 10
   };
 
+  var mPin2 = '';
+
   /**
    * User Interface constants
    */
@@ -36,7 +38,7 @@ function SimPinDialog(dialog) {
   var dialogTitle = dialog.querySelector('gaia-header h1');
   var dialogDone = dialog.querySelector('button[type="submit"]');
   var dialogClose = dialog.querySelector('button[type="reset"]');
-  dialogDone.onclick = verify;
+  dialogDone.onclick = function() { verify(_action); };
   dialogClose.onclick = skip;
 
   // numeric inputs -- 3 possible input modes:
@@ -47,16 +49,18 @@ function SimPinDialog(dialog) {
   var pukArea = dialog.querySelector('.sim-pukArea');
   var newPinArea = dialog.querySelector('.sim-newPinArea');
   var confirmPinArea = dialog.querySelector('.sim-confirmPinArea');
+
   function setInputMode(mode) {
-    pinArea.hidden = (mode === 'puk');
-    pukArea.hidden = (mode !== 'puk');
-    newPinArea.hidden = confirmPinArea.hidden = (mode === 'pin');
+    pinArea.hidden = mode === 'puk';
+    pukArea.hidden = mode !== 'puk';
+    newPinArea.hidden = confirmPinArea.hidden = mode === 'pin';
   }
+
   function numberPasswordInput(area) {
     var input = area.querySelector('input');
     input.addEventListener('input', function(evt) {
       if (evt.target === input) {
-        dialogDone.disabled = (input.value.length < 4);
+        dialogDone.disabled = input.value.length < 4;
       }
     });
     return input;
@@ -71,6 +75,7 @@ function SimPinDialog(dialog) {
   var errorMsg = dialog.querySelector('.sim-errorMsg');
   var errorMsgHeader = dialog.querySelector('.sim-messageHeader');
   var errorMsgBody = dialog.querySelector('.sim-messageBody');
+
   function showMessage(headerL10nId, bodyL10nId, args) {
     if (!headerL10nId) {
       errorMsg.hidden = true;
@@ -240,9 +245,11 @@ function SimPinDialog(dialog) {
    * This should be solved when bug 1070941 is fixed.
    */
   function updateFdnContact() {
-    var req = icc.updateContact('fdn', _fdnContactInfo, pinInput.value);
+    var pin = mPin2 || pinInput.value;
+    var req = icc.updateContact('fdn', _fdnContactInfo, pin);
 
     req.onsuccess = function onsuccess() {
+      mPin2 = pin; // Save pin2
       _onsuccess(_fdnContactInfo);
       close();
     };
@@ -274,56 +281,48 @@ function SimPinDialog(dialog) {
     };
   }
 
+  function getPin() {
+    _onsuccess(pinInput.value);
+    close();
+  }
 
   /**
    * Dialog box handling
    */
 
-  function verify() { // apply PIN|PUK
-    switch (_action) {
-      // get PIN code
-      case 'get_pin':
-        _onsuccess(pinInput.value);
-        close();
-        break;
+  var actions = {
+    get_pin: { fn: getPin },
+    // unlock SIM
+    unlock_pin: { fn: unlockPin },
+    unlock_puk: { fn: unlockPuk, param: 'puk' },
+    unlock_puk2: { fn: unlockPuk, param: 'puk2' },
 
-      // unlock SIM
-      case 'unlock_pin':
-        unlockPin();
-        break;
-      case 'unlock_puk':
-        unlockPuk('puk');
-        break;
-      case 'unlock_puk2':
-        unlockPuk('puk2');
-        break;
+    // PIN lock
+    enable_lock: { fn: enableLock, param: true },
+    disable_lock: { fn: enableLock, param: false },
+    change_pin: { fn: changePin, param: 'pin' },
 
-      // PIN lock
-      case 'enable_lock':
-        enableLock(true);
-        break;
-      case 'disable_lock':
-        enableLock(false);
-        break;
-      case 'change_pin':
-        changePin('pin');
-        break;
+    // get PIN2 code (FDN contact list)
+    get_pin2: { fn: updateFdnContact },
 
-      // get PIN2 code (FDN contact list)
-      case 'get_pin2':
-        updateFdnContact();
-        break;
+    // PIN2 lock (FDN)
+    enable_fdn: { fn: enableFdn, param: true },
+    disable_fdn: { fn: enableFdn, param: false },
+    change_pin2: { fn: changePin, param: 'pin2' }
+  };
 
-      // PIN2 lock (FDN)
-      case 'enable_fdn':
-        enableFdn(true);
-        break;
-      case 'disable_fdn':
-        enableFdn(false);
-        break;
-      case 'change_pin2':
-        changePin('pin2');
-        break;
+  /**
+   * Called when the user presses 'Done' in the PIN/PUK dialog after
+   * entering her password. Depending on the action to be done, we let
+   * different functions handle it.
+   *
+   * @param {string} action A sting deifning the action to do, e.g. 'get_pin'.
+   * @return {boolean}
+   */
+  function verify(action) {
+    var next = actions[action];
+    if (next) {
+      next.fn(next.param);
     }
 
     return false;
@@ -352,11 +351,13 @@ function SimPinDialog(dialog) {
 
 
   /**
-   * Expose a main `show()' method
+   * Initialize defaults and UI for a particular action
+   *
+   * @param {string} action Action, e.g. 'get_pin2'
+   * @return {string} Same action as the `action` parameter
    */
-
   function initUI(action) {
-    showMessage();
+    showMessage(); // Clear error mesage
     showRetryCount(); // Clear the retry count at first
     dialogDone.disabled = true;
 
@@ -365,60 +366,64 @@ function SimPinDialog(dialog) {
       // get PIN code
       case 'get_pin2':
         lockType = 'pin2';
+        if (mPin2) {
+          verify(action);
+          break;
+        }
       case 'get_pin':
         setInputMode('pin');
         _localize(dialogTitle, lockType + 'Title');
-        break;
+      break;
 
       // unlock SIM
       case 'unlock_pin':
         setInputMode('pin');
         _localize(dialogTitle, 'pinTitle');
-        break;
+      break;
       case 'unlock_puk':
         lockType = 'puk';
         setInputMode('puk');
         showMessage('simCardLockedMsg', 'enterPukMsg');
         _localize(dialogTitle, 'pukTitle');
-        break;
+      break;
       case 'unlock_puk2':
         lockType = 'puk2';
         setInputMode('puk');
         showMessage('simCardLockedMsg', 'enterPuk2Msg');
         _localize(dialogTitle, 'puk2Title');
-        break;
+      break;
 
       // PIN lock
       case 'enable_lock':
       case 'disable_lock':
         setInputMode('pin');
         _localize(dialogTitle, 'pinTitle');
-        break;
+      break;
       case 'change_pin':
         setInputMode('new');
         _localize(dialogTitle, 'newpinTitle');
-        break;
+      break;
 
       // FDN lock (PIN2)
       case 'enable_fdn':
         lockType = 'pin2';
         setInputMode('pin');
         _localize(dialogTitle, 'fdnEnable');
-        break;
+      break;
       case 'disable_fdn':
         lockType = 'pin2';
         setInputMode('pin');
         _localize(dialogTitle, 'fdnDisable');
-        break;
+      break;
       case 'change_pin2':
         lockType = 'pin2';
         setInputMode('new');
         _localize(dialogTitle, 'fdnReset');
-        break;
+      break;
 
       // unsupported
       default:
-        console.error('unsupported "' + action + '" action');
+        console.error('Unsupported "' + action + '" action');
         return '';
     }
 
@@ -428,25 +433,35 @@ function SimPinDialog(dialog) {
     var req = icc.getCardLockRetryCount(lockType);
     req.onsuccess = function() {
       var retryCount = req.result.retryCount;
+      console.log("RETRYCOUNT", retryCount);
       if (retryCount === _allowedRetryCounts[lockType]) {
         // hide the retry count if users had not input incorrect codes
         retryCount = null;
       }
       showRetryCount(retryCount);
     };
+
+    req.onerror = function(err) {
+      console.log(err);
+    };
     return action;
   }
 
-  function show(action, options) {
-    options = options || {};
-
-    icc = getIccByIndex(options.cardIndex);
-    if (!icc) {
+  /**
+   * Show a particular dialog for an action
+   *
+   * @param {string} action Action requested, e.g. 'get_pin2'
+   * @param {object} options Object containing different properties
+   */
+  function show(action, options = {}) {
+    var dialogPanel = '#' + dialog.id;
+    if (dialogPanel == Settings.currentPanel) {
       return;
     }
 
-    var dialogPanel = '#' + dialog.id;
-    if (dialogPanel == Settings.currentPanel) {
+    icc = getIccByIndex(options.cardIndex);
+    if (!icc) {
+      console.warning('Could not get ICC object');
       return;
     }
 
@@ -459,10 +474,8 @@ function SimPinDialog(dialog) {
     _origin = options.exitPanel || Settings.currentPanel;
     Settings.currentPanel = dialogPanel;
 
-    _onsuccess = (typeof options.onsuccess === 'function') ?
-        options.onsuccess : function() {};
-    _oncancel = (typeof options.oncancel === 'function') ?
-        options.oncancel : function() {};
+    _onsuccess = options.onsuccess || function() {};
+    _oncancel = options.oncancel || function() {};
     _fdnContactInfo = options.fdnContact;
 
     window.addEventListener('panelready', function inputFocus() {
@@ -475,8 +488,6 @@ function SimPinDialog(dialog) {
     });
   }
 
-  return {
-    show: show
-  };
+  return { show };
 }
 
