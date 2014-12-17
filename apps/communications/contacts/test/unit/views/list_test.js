@@ -862,7 +862,7 @@ suite('Render contacts list', function() {
             assertNoGroup(groupD, containerD);
             assertNoGroup(groupFav, containerFav);
             assertNoGroup(groupUnd, containerUnd);
-          });    
+          });
         });
       });
     });
@@ -871,13 +871,13 @@ suite('Render contacts list', function() {
       var newList = new MockContactsList();
       doLoad(subject, newList, function() {
         done(function() {
-          var originalNumber = 
+          var originalNumber =
             container.querySelectorAll('.contact-item').length;
           assert.isNotNull(container.querySelector('[data-uuid="2"]'));
 
           subject.remove('2');
 
-          var afterDelNumber = 
+          var afterDelNumber =
             container.querySelectorAll('.contact-item').length;
           assert.equal(originalNumber, afterDelNumber + 1);
           assert.isNotNull(container.querySelector('[data-uuid="1"]'));
@@ -965,6 +965,124 @@ suite('Render contacts list', function() {
               done();
             });
           });
+        });
+      });
+    });
+
+    suite('Above the fold caching', function() {
+      var pfth;
+
+      function onPerfEvent(name, cb) {
+        pfth.addEventListener(name, function atfr() {
+          pfth.removeEventListener(name, atfr);
+          cb();
+        });
+      }
+
+      setup(function() {
+        pfth = PerformanceTestingHelper.el;
+        localStorage.setItem('first-chunk', null);
+        contacts.List.resetDom();
+      });
+
+      test('notifyAboveTheFold caches content', function(done) {
+        onPerfEvent('above-the-fold-ready', function() {
+          assert.equal(localStorage.getItem('first-chunk'),
+            document.querySelector('#groups-list').innerHTML);
+
+          done();
+        });
+
+        doLoad(subject, new MockContactsList(), function() {});
+      });
+
+      test('on firstChunk clear out groups-list', function(done) {
+        var gl = document.querySelector('#groups-list');
+        gl.innerHTML = '<p>Hello</p>';
+
+        onPerfEvent('first-chunk', function() {
+          assert.equal(gl.innerHTML, '');
+          done();
+        });
+
+        doLoad(subject, new MockContactsList(), function() {});
+      });
+
+      test('on firstChunk don\'t clear out favorites', function(done) {
+        var gl = document.querySelector('#groups-list');
+        gl.innerHTML = '<section class="group-section" id="section-group-f' +
+          'avorites"><header class="" id="group-favorites"><abbr title="Co' +
+          'ntacts listed favorites"></abbr></header><ol data-group="favori' +
+          'tes" id="contacts-list-favorites" role="listbox"><li data-order' +
+          '="JAN" data-search="Jan" data-rendered="true" data-updated="140' +
+          '7684353174" role="option" class="contact-item" data-group="favo' +
+          'rites" data-uuid="da7bdd934f7941e3b28363fd7e4c3223"><label clas' +
+          's="contact-checkbox pack-checkbox"><input value="da7bdd934f7941' +
+          'e3b28363fd7e4c3223" name="selectIds[]" type="checkbox"><span></' +
+          'span></label><p class="contact-text"><strong>Jan</strong> </p><' +
+          '/li></ol></section>"';
+
+        onPerfEvent('first-chunk', function() {
+          assert.equal(gl.childNodes.length, 1);
+          assert.equal(
+            gl.childNodes[0].querySelector('.contact-text strong').innerHTML,
+            'Jan');
+          done();
+        });
+
+        doLoad(subject, new MockContactsList(), function() {});
+      });
+
+      test('DOM Change above the fold caches content', function(done) {
+        doLoad(subject, new MockContactsList(), function() {
+          var c = new MockContactAllFields();
+          c.id = '63127321';
+          c.category = ['favorite'];
+          doRefreshContact(subject, c);
+
+          setTimeout(function() {
+            assert.notEqual(
+              localStorage.getItem('first-chunk').indexOf('63127321'), -1);
+            done();
+          }, 100);
+        });
+      });
+
+      test('start-batch-import event stops caching', function(done) {
+        doLoad(subject, new MockContactsList(), function() {
+          window.dispatchEvent(new CustomEvent('start-batch-import'));
+
+          var c = new MockContactAllFields();
+          c.id = '63127321';
+          c.category = ['favorite'];
+          doRefreshContact(subject, c);
+
+          setTimeout(function() {
+            assert.equal(
+              localStorage.getItem('first-chunk').indexOf('63127321'), -1);
+            done();
+          }, 100);
+        });
+      });
+
+      test('finish-batch-import event starts caching', function(done) {
+        doLoad(subject, new MockContactsList(), function() {
+          window.dispatchEvent(new CustomEvent('start-batch-import'));
+
+          var c = new MockContactAllFields();
+          c.id = '63127321';
+          c.category = ['favorite'];
+          doRefreshContact(subject, c);
+
+          setTimeout(function() {
+            window.dispatchEvent(new CustomEvent('finish-batch-import'));
+
+            setTimeout(function() {
+              assert.notEqual(
+                localStorage.getItem('first-chunk').indexOf('63127321'), -1);
+              done();
+            }, 100);
+          }, 20);
         });
       });
     });

@@ -11,6 +11,7 @@
 /* global utils */
 /* global ICEStore */
 /* global ICEData */
+/* global PerformanceTestingHelper */
 
 var contacts = window.contacts || {};
 contacts.List = (function() {
@@ -55,6 +56,7 @@ contacts.List = (function() {
       // Dictionary by contact id with the rows on screen
       rowsOnScreen = {},
       selectedContacts = {},
+      favorites = [],
       _notifyRowOnScreenCallback = null,
       _notifyRowOnScreenUUID = null,
       // Will keep an array of contacts ids, not higger than
@@ -65,16 +67,16 @@ contacts.List = (function() {
 
   // Possible values for the configuration field 'defaultContactsOrder'
   // config.json file (see bug 841693)
-  var ORDER_BY_FAMILY_NAME = 'familyName';
+  const ORDER_BY_FAMILY_NAME = 'familyName';
 
-  var EXPORT_TRANSITION_LEVEL = 2;
+  const EXPORT_TRANSITION_LEVEL = 2;
   var isDangerSelectList = false;
 
-  var MAX_INT = 0x7fffffff;
+  const MAX_INT = 0x7fffffff;
 
   // Specify group short names or "letters" for those groups that have a name
   // different from something like "A" or "B".
-  var GROUP_LETTERS = {
+  const GROUP_LETTERS = {
     'favorites': '',
     'und': '#'
   };
@@ -98,7 +100,7 @@ contacts.List = (function() {
     return order;
   })();
 
-  var NOP_FUNCTION = function() {};
+  const NOP_FUNCTION = function() {};
 
   var onscreen = function(row) {
     var id = row.dataset.uuid;
@@ -377,8 +379,8 @@ contacts.List = (function() {
     }
 
     utils.config.load('/contacts/config.json').then(function ready(configData) {
-      orderByLastName = (configData.defaultContactsOrder ===
-                ORDER_BY_FAMILY_NAME ? true : false);
+      orderByLastName =
+        configData.defaultContactsOrder === ORDER_BY_FAMILY_NAME;
       defaultImage = configData.defaultImage === true;
       utils.cookie.update({
         order: orderByLastName,
@@ -669,18 +671,32 @@ contacts.List = (function() {
   }
 
   var CHUNK_SIZE = 20;
+  var _isFirstChunk = true;
   function loadChunk(chunk) {
+    if (_isFirstChunk) {
+      // Clean out cached data from groups-list
+      var childNodes = document.getElementById('groups-list').childNodes;
+      for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].id !== 'section-group-favorites') {
+          childNodes[i].parentNode.removeChild(childNodes[i]);
+        }
+      }
+      _isFirstChunk = false;
+
+      PerformanceTestingHelper.dispatch('first-chunk');
+    }
+
     var nodes = [];
-    for (var i = 0, n = chunk.length; i < n; ++i) {
-      if (i === getRowsPerPage()) {
+    for (var j = 0, n = chunk.length; j < n; ++j) {
+      if (j === getRowsPerPage()) {
         notifyAboveTheFold();
       }
 
-      var newNodes = appendToLists(chunk[i]);
+      var newNodes = appendToLists(chunk[j]);
       nodes.push.apply(nodes, newNodes);
     }
 
-    if (i < getRowsPerPage()) {
+    if (j < getRowsPerPage()) {
       notifyAboveTheFold();
     }
 
@@ -693,13 +709,17 @@ contacts.List = (function() {
   }
 
   // Time until we show the first contacts "above the fold" is a very
-  // important usability metric.  Emit an event when as soon as we reach
+  // important usability metric. Emit an event when as soon as we reach
   // this point so tools can measure the time.
   var notifiedAboveTheFold = false;
+  var aboveTheFoldHTML = '';
   function notifyAboveTheFold() {
     if (notifiedAboveTheFold) {
       return;
     }
+
+    aboveTheFoldHTML = document.getElementById('groups-list').innerHTML;
+    localStorage.setItem('first-chunk', aboveTheFoldHTML);
 
     notifiedAboveTheFold = true;
     // Replacing the old 'above-the-fold-ready' message
@@ -717,6 +737,82 @@ contacts.List = (function() {
       monitor = monitorTagVisibility(scrollable, 'li', scrollMargin,
                                      scrollDelta, onscreen, offscreen);
     });
+  }
+
+  function monitorListDomChanges(callback) {
+    var el = document.getElementById('groups-list');
+
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.type !== 'childList') {
+          return;
+        }
+
+        var changedNodes = [...m.addedNodes].concat([...m.removedNodes]);
+        var isDirty = changedNodes.some(n => n instanceof HTMLLIElement);
+
+        if (isDirty) {
+          callback();
+        }
+      });
+    });
+
+    function start() {
+      observer.observe(el, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    function stop() {
+      observer.disconnect();
+    }
+
+    window.addEventListener('start-batch-import', stop);
+    window.addEventListener('finish-batch-import', function() {
+      start();
+      callback();
+    });
+
+    start();
+  }
+
+  function getHtmlAboveTheFold() {
+    var groups = document.querySelector('groups-list');
+
+    /**
+     * This function gets the HTML for all contact items above the fold,
+     * so we can cache exactly that. It works like this:
+     * 1. Get the first N li items
+     * 2. Figure out which section group they belong to
+     * 3. Clone the section groups that contain li's above the fold
+     * 4. Strip out the li's that are not above the fold from the cloned group
+     * 5. Get the outerHTML for all cloned groups
+     * 6. Return concatted as one string
+     */
+    // Get the first N li items that make up the above the fold list
+    var incl = [...groups.querySelectorAll('li')].slice(0, getRowsPerPage());
+
+    var uuids = incl.map(li => li.dataset.uuid);
+
+    return incl
+      .map(n => n.dataset.group)
+      // uniquify
+      .filter((value, index, self) => self.indexOf(value) === index)
+      // Clone section nodes
+      .map(groupId => {
+        var groupNode = groups.querySelector('#section-group-' + groupId)
+          .cloneNode(true);
+
+        // Filter out LIs below the fold
+        [...groupNode.querySelectorAll('li')].forEach(li => {
+          if (uuids.indexOf(li.dataset.uuid) === -1) {
+            li.parentNode.removeChild(li);
+          }
+        });
+
+        return groupNode.outerHTML;
+    }).join('');
   }
 
   function getViewHeight(config) {
@@ -765,18 +861,15 @@ contacts.List = (function() {
   function appendToLists(contact) {
     updatePhoto(contact);
     var ph = createPlaceholder(contact);
-    var groups = [ph.dataset.group];
     if (isFavorite(contact)) {
-      groups.push('favorites');
+      favorites.push(contact);
     }
 
     var nodes = [];
 
-    for (var i = 0, n = groups.length; i < n; ++i) {
-      ph = appendToList(contact, groups[i], ph);
-      nodes.push(ph);
-      ph = null;
-    }
+    ph = appendToList(contact, ph.dataset.group, ph);
+    nodes.push(ph);
+    ph = null;
 
     selectedContacts[contact.id] = selectAllPending;
 
@@ -832,6 +925,41 @@ contacts.List = (function() {
       loaded = true;
     });
 
+    // Now monitor the groupsList DOM node for changes
+    monitorListDomChanges(function() {
+      var newAboveTheFold = getHtmlAboveTheFold();
+      if (newAboveTheFold !== aboveTheFoldHTML) {
+        aboveTheFoldHTML = newAboveTheFold;
+        localStorage.setItem('first-chunk', aboveTheFoldHTML);
+      }
+    });
+
+    // Render favorites
+    var favGroup = document.querySelector('#section-group-favorites');
+    if (favGroup) {
+      favGroup.parentNode.removeChild(favGroup);
+    }
+
+    favorites.forEach(addToFavorites);
+    favorites = [];
+  };
+
+  var addToFavorites = function addToFavorites(contactOrNode) {
+    var list = getGroupList('favorites');
+    var cloned = contactOrNode instanceof HTMLElement ?
+      contactOrNode.cloneNode(true) :
+      renderContact(contactOrNode);
+    cloned.dataset.group = 'favorites';
+
+    if (!(contactOrNode instanceof HTMLElement)) {
+      if (!loadedContacts[cloned.dataset.uuid]) {
+        loadedContacts[cloned.dataset.uuid] = {};
+      }
+      loadedContacts[cloned.dataset.uuid].favorites = contactOrNode;
+    }
+
+    addToGroup(cloned, list);
+
     loadICE();
   };
 
@@ -870,7 +998,7 @@ contacts.List = (function() {
       return;
     }
 
-    forceICEGroupToBeHidden = !(!!show); 
+    forceICEGroupToBeHidden = !(!!show);
     forceICEGroupToBeHidden ? hideICEGroup() : showICEGroup();
   }
 
@@ -1220,7 +1348,7 @@ contacts.List = (function() {
       successCb();
       return;
     }
-    
+
     var options = {
       filterBy: ['id'],
       filterOp: 'equals',
@@ -1317,15 +1445,6 @@ contacts.List = (function() {
 
     loadedContacts[contact.id][renderedNode.dataset.group] = contact;
 
-    // If is favorite add as well to the favorite group
-    if (isFavorite(contact)) {
-      list = getGroupList('favorites');
-      loadedContacts[contact.id].favorites = contact;
-      var cloned = renderedNode.cloneNode(true);
-      cloned.dataset.group = 'favorites';
-      renderPhoto(cloned, contact.id, false, 'favorites');
-      addToGroup(cloned, list);
-    }
     toggleNoContactsScreen(false);
 
     // Avoid calling imgLoader.reload() here because it causes a sync reflow
@@ -1345,6 +1464,8 @@ contacts.List = (function() {
     //    all the contact is clicked, so we add it as selected
     selectedContacts[contact.id] = selectAllPending ||
       (selectAll && selectAll.disabled);
+
+    return renderedNode;
   };
 
   var hasName = function hasName(contact) {
@@ -1551,7 +1672,10 @@ contacts.List = (function() {
 
   function refreshContact(contact, enriched, callback) {
     remove(contact.id);
-    addToList(contact, enriched);
+    var node = addToList(contact, enriched);
+    if (node && isFavorite(contact)) {
+      addToFavorites(node);
+    }
     if (contacts.Search) {
       contacts.Search.updateSearchList(function() {
         if (callback) {
@@ -1597,6 +1721,7 @@ contacts.List = (function() {
     headers = {};
     loadedContacts = {};
     loaded = false;
+    _isFirstChunk = true;
 
     if (cb) {
       cb();
@@ -2016,14 +2141,10 @@ contacts.List = (function() {
   };
 
   var countSelectedContacts = function countSelectedContacts() {
-    var counter = 0;
-    for (var id in selectedContacts) {
-      if (selectedContacts[id]) {
-        counter++;
-      }
-    }
-
-    return counter;
+    // Filter out ids that are false
+    return Object.keys(selectedContacts)
+      .filter(id => !!selectedContacts[id])
+      .length;
   };
 
   /*
@@ -2136,6 +2257,7 @@ contacts.List = (function() {
     'getHighlightedName': getHighlightedName,
     'selectFromList': selectFromList,
     'exitSelectMode': exitSelectMode,
+    'resetDom': resetDom,
     get chunkSize() {
       return CHUNK_SIZE;
     },

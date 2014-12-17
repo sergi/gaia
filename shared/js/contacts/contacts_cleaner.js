@@ -21,8 +21,10 @@ window.ContactsCleaner = function(contacts) {
       cleanContacts(0);
     }
     else if (typeof self.onsuccess === 'function') {
-            window.setTimeout(self.onsuccess, 0);
+      window.setTimeout(self.onsuccess, 0);
     }
+
+    window.parent.dispatchEvent(new CustomEvent('start-batch-import'));
   };
 
   this.hold = function() {
@@ -61,7 +63,7 @@ window.ContactsCleaner = function(contacts) {
       var cleaned = e.target.number;
       window.setTimeout(function() {
         self.oncleaned(cleaned);
-      },0);
+      }, 0);
     }
     continueCb();
   }
@@ -84,6 +86,8 @@ window.ContactsCleaner = function(contacts) {
   }
 
   function notifySuccess() {
+    window.parent.dispatchEvent(new CustomEvent('finish-batch-import'));
+
     if (typeof self.onsuccess === 'function') {
       window.setTimeout(self.onsuccess);
     }
