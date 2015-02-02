@@ -1,16 +1,18 @@
 'use strict';
 /* global ActivityHandler */
+/* global Cache */
 /* global ConfirmDialog */
 /* global ContactPhotoHelper */
 /* global Contacts */
 /* global fb */
+/* global ICEStore */
+/* global ICEData */
 /* global ImageLoader */
 /* global LazyLoader */
 /* global monitorTagVisibility */
 /* global Normalizer */
+/* global plog */
 /* global utils */
-/* global ICEStore */
-/* global ICEData */
 
 var contacts = window.contacts || {};
 contacts.List = (function() {
@@ -182,6 +184,7 @@ contacts.List = (function() {
   };
 
   var init = function load(element, reset) {
+    plog('Contacts.list.init');
     _ = navigator.mozL10n.get;
 
     cancel = document.getElementById('cancel-search'),
@@ -293,6 +296,7 @@ contacts.List = (function() {
   };
 
   var initAlphaScroll = function initAlphaScroll() {
+    plog('Contacts.list.initAlphaScroll');
     var overlay = document.querySelector('nav[data-type="scrollbar"] p');
     var jumper = document.querySelector('nav[data-type="scrollbar"] ol');
 
@@ -320,11 +324,13 @@ contacts.List = (function() {
   };
 
   var load = function load(contacts, forceReset, callback) {
+    plog('Contacts.list.load');
     var onError = function() {
       console.log('ERROR Retrieving contacts');
     };
 
     var complete = function complete() {
+      plog('Contacts.list.load.complete');
       initConfiguration(function onInitConfiguration() {
         getContactsByGroup(onError, contacts).then(() => {
           if (typeof callback === 'function') {
@@ -365,6 +371,7 @@ contacts.List = (function() {
    * @param (Function) callback function to be invoked after process
    */
   var initConfiguration = function initConfiguration(callback) {
+    plog('Contacts.list.initConfiguration');
     callback = callback || function() {};
     if (orderByLastName !== null && defaultImage !== null) {
       callback();
@@ -673,14 +680,17 @@ contacts.List = (function() {
 
   var CHUNK_SIZE = 20;
   function loadChunk(chunk) {
+    plog('loadChunk ' + chunk.length);
     var nodes = [];
     for (var i = 0, n = chunk.length; i < n; ++i) {
       if (i === getRowsPerPage()) {
         notifyAboveTheFold();
       }
 
-      var newNodes = appendToLists(chunk[i]);
-      nodes.push.apply(nodes, newNodes);
+      if (!Cache.active || !Cache.hasContact(chunk[i].id)) {
+        var newNodes = appendToLists(chunk[i]);
+        nodes.push.apply(nodes, newNodes);
+      }
     }
 
     if (i < getRowsPerPage()) {
@@ -706,7 +716,8 @@ contacts.List = (function() {
 
     notifiedAboveTheFold = true;
     // Replacing the old 'above-the-fold-ready' message
-    utils.PerformanceHelper.contentInteractive();
+    // TODO: if no cache fire this
+    // utils.PerformanceHelper.contentInteractive();
 
     // Don't bother loading the monitor until we have rendered our
     // first screen of contacts.  This avoids the overhead of
@@ -790,7 +801,7 @@ contacts.List = (function() {
     return nodes;
   }
 
-  //Adds each contact to its group container
+  // Adds each contact to its group container
   function appendToList(contact, group, ph) {
     ph = ph || createPlaceholder(contact, group);
     var list = getGroupList(group);
@@ -831,15 +842,22 @@ contacts.List = (function() {
 
     // Replacing old message 'startup-path-done'
     utils.PerformanceHelper.loadEnd();
-    fb.init(function contacts_init() {
-      if (fb.isEnabled) {
-        Contacts.loadFacebook(NOP_FUNCTION);
-      }
-      lazyLoadImages();
-      loaded = true;
+    LazyLoader.load([
+     '/contacts/js/fb/fb_init.js',
+     '/contacts/js/fb_loader.js',
+     '/shared/js/contacts/utilities/image_loader.js'
+    ], () => {
+      fb.init(function contacts_init() {
+        if (fb.isEnabled) {
+          Contacts.loadFacebook(NOP_FUNCTION);
+        }
+        lazyLoadImages();
+        loaded = true;
+      });
     });
-
     loadICE();
+
+    cacheContactsList();
   };
 
   /**
@@ -1055,6 +1073,7 @@ contacts.List = (function() {
    * image.
    */
   function createPhotoTemplate() {
+    plog('Contacts.list.createPhotoTemplate');
     if (photoTemplate) {
       return;
     }
@@ -1197,6 +1216,7 @@ contacts.List = (function() {
   };
 
   var getContactsByGroup = function gCtByGroup(errorCb, contacts) {
+    plog('Contacts.list.getContactsByGroup');
     return Contacts.asyncScriptsLoaded.then(() => {
       notifiedAboveTheFold = false;
       if (contacts) {
@@ -1250,6 +1270,10 @@ contacts.List = (function() {
   };
 
   var getAllContacts = function cl_getAllContacts(errorCb, successCb) {
+    plog('Contacts.list.getAllContacts');
+    if (Cache.active) {
+      headers = Cache.headers;
+    }
     loading = true;
     initConfiguration(function onInitConfiguration() {
       var sortBy = (orderByLastName === true ? 'familyName' : 'givenName');
@@ -2149,6 +2173,75 @@ contacts.List = (function() {
   function _clearNotifyRowOnScreenByUUID() {
     _notifyRowOnScreenCallback = null;
     _notifyRowOnScreenUUID = null;
+  }
+
+  function getFirstChunkCache() {
+    // Get a representation of each group holding the first chunk of contacts
+    // as objects of this form:
+    // {
+    //   elementName: <string>,
+    //   attributes: <Array>,
+    //   innerHTML: <string>
+    // }
+
+    var cache = [];
+
+    var groups = Array.prototype.slice.call(groupsList.children);
+    var contactsCount = CHUNK_SIZE;
+    while (contactsCount && groups.length) {
+      var group = groups.shift();
+
+      var groupCache = {};
+      groupCache.elementName = 'section';
+      groupCache.attributes = [];
+      for (var j = 0; j < group.attributes.length; j++) {
+        groupCache.attributes.push({
+          name: group.attributes[j].nodeName,
+          value: group.attributes[j].value
+        });
+      }
+
+      var section = document.createElement('section');
+      section.appendChild(group.querySelector('header').cloneNode(true));
+
+      // We only want complete contacts until we reach CHUNK_SIZE
+      plog('Building ol');
+      var ol = group.querySelector('ol');
+      var contacts = ol.cloneNode();
+      [].forEach.call(ol.querySelectorAll('li.contact-item'), (node) => {
+        if (!contactsCount) {
+          return;
+        }
+        contactsCount--;
+        var contact = node.cloneNode(true);
+        // We cannot cache the contact image, so we get rid of them.
+        var img = node.querySelector('span[data-type="img"]');
+        delete img.dataset.src;
+        delete img.style;
+        contact.dataset.cache = true;
+        contacts.appendChild(contact);
+      });
+      section.appendChild(contacts);
+      plog('Done with ol');
+
+      groupCache.innerHTML = section.innerHTML;
+      section = null;
+      cache.push(groupCache);
+    }
+
+    plog('Going to cache ' + cache.length + ' groups');
+    plog('Cache size ' + JSON.stringify(cache).length);
+    return cache;
+  }
+
+  /*
+  function getFirstChunkCacheInnerHTML() {
+    // XXX
+  }
+*/
+  function cacheContactsList() {
+    // XXX document.
+    Cache.firstChunk = getFirstChunkCache();
   }
 
   return {
