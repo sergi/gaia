@@ -161,7 +161,23 @@ var _xstart = performance.timing.fetchStart -
       if (!_cachedContacts || !_cachedContacts.has(aUuid)) {
         return;
       }
-      return _cachedContacts.get(aUuid);
+      var contact = _cachedContacts.get(aUuid);
+      // We should get each contact once while rendering the contacts list
+      // to see if what we have in the cache is different to what we have in
+      // the contacts source (most likely mozContacts). Removing the contact
+      // entry from the map allow us to easily check if we have any contact in
+      // the cache that was deleted from the original source and so it needs
+      // to be removed from the view.
+      _cachedContacts.delete(aUuid);
+      return contact;
+    },
+
+    get contacts() {
+      return _cachedContacts ? _cachedContacts.keys() : null;
+    },
+
+    get length() {
+      return _cachedContacts ? _cachedContacts.size : 0;
     },
 
     get headers() {
@@ -173,7 +189,7 @@ var _xstart = performance.timing.fetchStart -
     },
 
     cleanup: function() {
-      _caches = null;
+      _caches.get(FIRST_CHUNK).content = null;
       _cachedContacts = null;
       _cachedHeaders = null;
     }

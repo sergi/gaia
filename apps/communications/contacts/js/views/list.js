@@ -843,6 +843,9 @@ contacts.List = (function() {
   // Methods executed after rendering the list
   // by first time
   var onListRendered = function onListRendered() {
+    // Once we've rendered the whole list, we can check if what we added
+    // in the cached chunk is valid.
+    verifyCache();
     // We cancel any pending intent of selection
     // Now any new contact added to the list will
     // be selected just if we clicked on select all
@@ -2256,6 +2259,23 @@ contacts.List = (function() {
   function cacheContactsList() {
     // XXX document.
     Cache.firstChunk = getFirstChunkCache();
+  }
+
+  function verifyCache() {
+    if (!Cache.active || !Cache.length) {
+      // Everything is fine.
+      return;
+    }
+
+    // If there is still any contact to consume in the cache it
+    // means that this contact is no longer part of the contacts
+    // source, but it is still in the DOM, so we need to eliminate it.
+    var contacts = Cache.contacts;
+    contacts.forEach((contact) => {
+      var li = document.querySelector('li[data-uuid=\'' + contact +'\"]');
+      li.parentNode.removeChild(li);
+      // XXX check group, we might need to delete it as well.
+    });
   }
 
   return {
