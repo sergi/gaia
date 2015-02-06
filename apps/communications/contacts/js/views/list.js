@@ -819,10 +819,16 @@ contacts.List = (function() {
 
     loadedContacts[contact.id][group] = contact;
 
-    if (inCache &&
-        Cache.getContact(contact.id) === ph.innerHTML) {
-      ph = null;
-      return;
+    // If the contact is in the cache but nothing changed, we bail out.
+    // Otherwise, we remove the DOM node and let the flow continue so we
+    // can append the a new node with the updated information.
+    if (inCache) {
+      if (Cache.getContact(contact.id) === ph.innerHTML) {
+        ph = null;
+        return;
+      }
+      var toDelete = list.querySelector('li[data-uuid=\"' + contact.id + '\"]');
+      toDelete.parentNode.removeChild(toDelete);
     }
 
     list.appendChild(ph);
