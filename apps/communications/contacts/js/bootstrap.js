@@ -76,14 +76,12 @@ var _xstart = performance.timing.fetchStart -
         fragment.appendChild(child);
         plog('Node appended');
 
-        var headerName = child.id.substr(child.id.length - 1);
+        var headerName = child.id.split('section-group-')[1];
         if (!_cachedHeaders) {
           _cachedHeaders = {};
         }
         _cachedHeaders[headerName] =
           fragment.querySelector('ol#contacts-list-' + headerName);
-
-        plog('OL ' + _cachedHeaders[headerName]);
 
         if (!resolved) {
           resolve();
@@ -226,15 +224,12 @@ var _xstart = performance.timing.fetchStart -
       // At this point we can consider the app visually completed so we can
       // send the corresponding performance related events.
       utils.PerformanceHelper.contentInteractive();
-      // window.dispatchEvent(new CustomEvent('moz-chrome-dom-loaded'));
-      // window.dispatchEvent(new CustomEvent('moz-app-visually-complete'));
     });
 
     window.onload = () => {
       plog('onload');
       utils.PerformanceHelper.visuallyComplete();
       loadScripts();
-      // XXX unqueue cache eviction
     };
   });
 
