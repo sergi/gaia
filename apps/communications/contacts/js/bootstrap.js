@@ -35,6 +35,14 @@ var _xstart = performance.timing.fetchStart -
     localStorage.setItem(aCache.id, JSON.stringify(aCache.content));
   }
 
+  function setCacheFirstChunk(aCache) {
+    if (!aCache.id || !aCache.content || !_caches.has(aCache.id)) {
+      return;
+    }
+
+    localStorage.setItem(aCache.id, aCache.content);
+  }
+
   function getCachedContacts(aNodeList) {
     if (!aNodeList) {
       return;
@@ -48,6 +56,24 @@ var _xstart = performance.timing.fetchStart -
       _cachedContacts.set(aNodeList[i].dataset.uuid,
                           aNodeList[i].innerHTML);
     }
+  }
+
+  function appendFirstChunkToContainer(aContainer, contents) {
+      aContainer.innerHTML = contents;
+      for (var i = 0; i < aContainer.childElementCount; i++) {
+        var child = aContainer.children[i];
+        var headerName = child.id.split('section-group-')[1];
+        if (!_cachedHeaders) {
+          _cachedHeaders = {};
+        }
+        _cachedHeaders[headerName] =
+          document.getElementById('contacts-list-' + headerName);
+      }
+      plog('Getting cached contacts for 1st chunk');
+      getCachedContacts(aContainer.querySelectorAll('li[data-cache=true]'));
+      plog('firstChunk appended')
+
+      return Promise.resolve();
   }
 
   function appendNodesToContainer(aContainer, aNodeList) {
@@ -93,6 +119,47 @@ var _xstart = performance.timing.fetchStart -
       plog('Done getting cached headers.');
       aContainer.appendChild(fragment);
       plog('All nodes appended');
+    });
+  }
+
+  function applyCacheFirstChunk(aCacheId) {
+    if (!_caches.has(aCacheId)) {
+      return Promise.resolve();
+    }
+
+    var cache = _caches.get(aCacheId);
+
+    var cacheContent = localStorage.getItem(aCacheId);
+    if (!cacheContent) {
+      return Promise.resolve();
+    }
+
+    try {
+      cache.content = cacheContent;
+      _caches.set(aCacheId, cache);
+    } catch(e) {
+      console.error(e);
+      return Promise.resolve();
+    }
+
+    plog('CACHE content!');
+
+    if (!cache.containerId) {
+      return Promise.resolve();
+    }
+
+    var container = document.getElementById(cache.containerId);
+    if (!container) {
+      console.warning('Could not apply cached content to ' +
+                      cache.containerId);
+      return Promise.resolve();
+    }
+
+    return appendFirstChunkToContainer(container, cacheContent).then(() => {
+      cache.content = null;
+      cache.active = true;
+      _caches.set(aCacheId, cache);
+      return Promise.resolve();
     });
   }
 
@@ -147,7 +214,7 @@ var _xstart = performance.timing.fetchStart -
       if (!aContent) {
         return;
       }
-      setCache({
+      setCacheFirstChunk({
         id: FIRST_CHUNK,
         content: aContent
       });
@@ -236,7 +303,7 @@ var _xstart = performance.timing.fetchStart -
     utils.PerformanceHelper.domLoaded();
     window.removeEventListener('DOMContentLoaded', ondomloaded);
 
-    applyCache(FIRST_CHUNK).then(() => {
+    applyCacheFirstChunk(FIRST_CHUNK).then(() => {
       // At this point we can consider the app visually completed so we can
       // send the corresponding performance related events.
       utils.PerformanceHelper.contentInteractive();

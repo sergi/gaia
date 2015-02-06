@@ -2192,6 +2192,54 @@ contacts.List = (function() {
     _notifyRowOnScreenUUID = null;
   }
 
+  function getFirstChunkCacheHTML() {
+    var cache = [];
+    var groups = groupsList.children;
+    var len = groupsList.children.length;
+    var nodeString = '';
+    var contactsCount = 0;
+
+    for (var i = 0; i < len; i++) {
+      var group = groups[i];
+      var section = document.createElement('section');
+      for (var j = 0; j < group.attributes.length; j++) {
+        section.setAttribute(
+          group.attributes[j].nodeName,
+          group.attributes[j].value);
+      }
+      section.appendChild(group.querySelector('header').cloneNode(true));
+
+      plog('Building ol');
+      var ol = group.querySelector('ol');
+      var contacts = ol.cloneNode();
+      var contactItems = ol.querySelectorAll('li.contact-item');
+      for (var l = 0; l < contactItems.length; l++) {
+        var node = contactItems[l];
+        if (contactsCount === CHUNK_SIZE) {
+          return nodeString;
+        }
+        contactsCount += 1;
+
+        var contact = node.cloneNode(true);
+
+        // We cannot cache the contact image, so we get rid of them.
+        var aside = contact.querySelector('aside');
+        aside.parentNode.removeChild(aside);
+
+        contact.dataset.cache = true;
+        contacts.appendChild(contact);
+      }
+      section.appendChild(contacts);
+
+      nodeString += section.outerHTML;
+      section = null;
+    }
+
+    plog('Going to cache ' + cache.length + ' groups');
+    plog('Cache size ' + JSON.stringify(cache).length);
+    return nodeString;
+  }
+
   function getFirstChunkCache() {
     // Get a representation of each group holding the first chunk of contacts
     // as objects of this form:
@@ -2258,7 +2306,7 @@ contacts.List = (function() {
 */
   function cacheContactsList() {
     // XXX document.
-    Cache.firstChunk = getFirstChunkCache();
+    Cache.firstChunk = getFirstChunkCacheHTML();
   }
 
   function verifyCache() {
