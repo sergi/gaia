@@ -687,10 +687,8 @@ contacts.List = (function() {
         notifyAboveTheFold();
       }
 
-      if (!Cache.active || !Cache.hasContact(chunk[i].id)) {
-        var newNodes = appendToLists(chunk[i]);
-        nodes.push.apply(nodes, newNodes);
-      }
+      var newNodes = appendToLists(chunk[i]);
+      nodes.push.apply(nodes, newNodes);
     }
 
     if (i < getRowsPerPage()) {
@@ -806,8 +804,12 @@ contacts.List = (function() {
     ph = ph || createPlaceholder(contact, group);
     var list = getGroupList(group);
 
-    // If above the fold for list, render immediately
-    if (list.children.length < getRowsPerPage()) {
+    var inCache = (Cache.active && Cache.hasContact(contact.id));
+
+    // If above the fold for list or if the contact is in the cache,
+    // create the DOM node. If the contact is in the cache and has not
+    // changed, we won't append it to the DOM.
+    if (list.children.length < getRowsPerPage() || inCache) {
       renderContact(contact, ph);
     }
 
@@ -816,6 +818,12 @@ contacts.List = (function() {
     }
 
     loadedContacts[contact.id][group] = contact;
+
+    if (inCache &&
+        Cache.getContact(contact.id) === ph.innerHTML) {
+      ph = null;
+      return;
+    }
 
     list.appendChild(ph);
     if (list.children.length === 1) {
@@ -2205,7 +2213,6 @@ contacts.List = (function() {
       section.appendChild(group.querySelector('header').cloneNode(true));
 
       // We only want complete contacts until we reach CHUNK_SIZE
-      plog('Building ol');
       var ol = group.querySelector('ol');
       var contacts = ol.cloneNode();
       [].forEach.call(ol.querySelectorAll('li.contact-item'), (node) => {
@@ -2213,16 +2220,17 @@ contacts.List = (function() {
           return;
         }
         contactsCount--;
+
         var contact = node.cloneNode(true);
+
         // We cannot cache the contact image, so we get rid of them.
-        var img = node.querySelector('span[data-type="img"]');
-        delete img.dataset.src;
-        delete img.style;
+        var aside = contact.querySelector('aside');
+        aside.parentNode.removeChild(aside);
+
         contact.dataset.cache = true;
         contacts.appendChild(contact);
       });
       section.appendChild(contacts);
-      plog('Done with ol');
 
       groupCache.innerHTML = section.innerHTML;
       section = null;
